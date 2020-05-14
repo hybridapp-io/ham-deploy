@@ -40,8 +40,8 @@ import (
 const (
 	crdRootPath          = "/usr/local/etc/hybridapp/crds/"
 	crdDeployableSubPath = "core/deployable"
-	crdAssemblerSubPath  = "deploy/assembler"
-	crdDiscovererSubPath = "deploy/discoverer"
+	crdAssemblerSubPath  = "tools/assembler"
+	crdDiscovererSubPath = "tools/discoverer"
 )
 
 /**
