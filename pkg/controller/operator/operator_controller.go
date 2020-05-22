@@ -177,7 +177,9 @@ func (r *ReconcileOperator) createBasicPod(cr *deployv1alpha1.Operator) *corev1.
 	opns, err := k8sutil.GetOperatorNamespace()
 	if err == nil {
 		oppod, err := k8sutil.GetPod(context.TODO(), r.client, opns)
-		if err != nil {
+
+		if err == nil {
+			oppod.Spec.Containers = nil
 			oppod.Spec.DeepCopyInto(&pod.Spec)
 		}
 	}
@@ -285,7 +287,7 @@ func isEqualVolumes(oldvols, newvols []corev1.Volume) bool {
 	for _, vol := range newvols {
 		if oldvol, ok := volmap[vol.Name]; !ok {
 			return false
-		} else if !reflect.DeepEqual(oldvol, vol) {
+		} else if !reflect.DeepEqual(*oldvol, vol) {
 			return false
 		}
 

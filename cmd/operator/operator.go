@@ -125,7 +125,7 @@ func RunManager(sig <-chan struct{}) {
 	// Add the Metrics Service
 	addMetrics(ctx, cfg)
 
-	klog.Info("Starting the Cmd.")
+	klog.Info("Starting the Hybrid Application Model operator.")
 
 	// Start the Cmd
 	if err := mgr.Start(sig); err != nil {

@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.1-398
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.2
 
 ENV OPERATOR=/usr/local/bin/ham-deploy \
     USER_UID=1001 \
