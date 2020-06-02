@@ -40,7 +40,7 @@ var (
 		Namespace: "default",
 	}
 
-	acceptLicense = deployv1alpha1.LicenseSpec {
+	acceptLicense = deployv1alpha1.LicenseSpec{
 		Accept: true,
 	}
 
