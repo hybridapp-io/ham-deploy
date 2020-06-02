@@ -104,9 +104,9 @@ type OperatorSpec struct {
 	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors.displayName="Accept terms and conditions"
 	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors.x-descriptors="urn:alm:descriptor:com.tectonic.ui:booleanSwitch"
 	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors.index=1
-	LicenseSpec   LicenseSpec `json:"license"`
-	CoreSpec  *CoreSpec   `json:"core,omitempty"`
-	ToolsSpec *ToolsSpec  `json:"tools,omitempty"`
+	LicenseSpec *LicenseSpec `json:"license"`
+	CoreSpec    *CoreSpec    `json:"core,omitempty"`
+	ToolsSpec   *ToolsSpec   `json:"tools,omitempty"`
 }
 
 // OperatorStatus defines the observed state of Operator
