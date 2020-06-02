@@ -94,10 +94,19 @@ type ToolsSpec struct {
 	ResourceDiscovererSpec   *ResourceDiscovererSpec   `json:"discoverer,omitempty"`
 }
 
+type LicenseSpec struct {
+	Accept bool `json:"accept"`
+}
+
 // OperatorSpec defines the desired state of Operator
 type OperatorSpec struct {
-	CoreSpec  *CoreSpec  `json:"core,omitempty"`
-	ToolsSpec *ToolsSpec `json:"tools,omitempty"`
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors.displayName="Accept terms and conditions"
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors.x-descriptors="urn:alm:descriptor:com.tectonic.ui:booleanSwitch"
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors.index=1
+	LicenseSpec   LicenseSpec `json:"license"`
+	CoreSpec  *CoreSpec   `json:"core,omitempty"`
+	ToolsSpec *ToolsSpec  `json:"tools,omitempty"`
 }
 
 // OperatorStatus defines the observed state of Operator

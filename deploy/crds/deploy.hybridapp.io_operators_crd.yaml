@@ -51,6 +51,13 @@ spec:
                       type: string
                   type: object
               type: object
+            license:
+              properties:
+                accept:
+                  type: boolean
+              required:
+              - accept
+              type: object
             tools:
               properties:
                 assembler:
@@ -115,6 +122,8 @@ spec:
                   - clusternamespace
                   type: object
               type: object
+          required:
+          - license
           type: object
         status:
           description: OperatorStatus defines the observed state of Operator
