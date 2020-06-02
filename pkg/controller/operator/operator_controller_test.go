@@ -40,6 +40,10 @@ var (
 		Namespace: "default",
 	}
 
+	acceptLicense = deployv1alpha1.LicenseSpec {
+		Accept: true,
+	}
+
 	defaultContainerNumber = 2
 	single                 = 1
 	falsevalue             = false
@@ -71,6 +75,7 @@ func TestReconcile(t *testing.T) {
 	deploy := &deployv1alpha1.Operator{}
 	deploy.Name = request.Name
 	deploy.Namespace = request.Namespace
+	deploy.Spec.LicenseSpec = &acceptLicense
 
 	g.Expect(c.Create(context.TODO(), deploy)).To(Succeed())
 
@@ -135,7 +140,7 @@ func TestDiscoverer(t *testing.T) {
 			Namespace: request.Namespace,
 		},
 		Spec: deployv1alpha1.OperatorSpec{
-			LicenseSpec: deployv1alpha1.LicenseSpec {
+			LicenseSpec: &deployv1alpha1.LicenseSpec{
 				Accept: true,
 			},
 			CoreSpec: &deployv1alpha1.CoreSpec{
