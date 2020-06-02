@@ -135,6 +135,9 @@ func TestDiscoverer(t *testing.T) {
 			Namespace: request.Namespace,
 		},
 		Spec: deployv1alpha1.OperatorSpec{
+			LicenseSpec: deployv1alpha1.LicenseSpec {
+				Accept: true,
+			},
 			CoreSpec: &deployv1alpha1.CoreSpec{
 				DeployableOperatorSpec: &deployv1alpha1.DeployableOperatorSpec{
 					GenericContainerSpec: deployv1alpha1.GenericContainerSpec{
