@@ -117,6 +117,13 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 		return reconcile.Result{}, err
 	}
 
+	// License must be accepted
+	if !instance.Spec.LicenseSpec.Accept {
+		licenseErr := errors.NewBadRequest("License must be accepted in order to proceed.")
+		return reconcile.Result{}, licenseErr
+		klog.Error("License was not accepted.", licenseErr)
+	}
+
 	// Define a new Pod object
 	pod := r.newPodForCR(instance)
 
