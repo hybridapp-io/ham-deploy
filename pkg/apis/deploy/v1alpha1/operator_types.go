@@ -122,7 +122,7 @@ type OperatorStatus struct {
 	Phase     Phase            `json:"phase,omitempty"`
 	Reason    string           `json:"reason,omitempty"`
 	Message   string           `json:"message,omitempty"`
-	PodStatus corev1.PodStatus `json:",inline"`
+	PodStatus *corev1.PodStatus `json:"podstatus,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
