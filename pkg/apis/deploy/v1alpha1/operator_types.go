@@ -119,9 +119,9 @@ const (
 // OperatorStatus defines the observed state of Operator
 type OperatorStatus struct {
 	// +kubebuilder:validation:Enum=Installed;Pending;Error
-	Phase     Phase            `json:"phase,omitempty"`
-	Reason    string           `json:"reason,omitempty"`
-	Message   string           `json:"message,omitempty"`
+	Phase     Phase             `json:"phase,omitempty"`
+	Reason    string            `json:"reason,omitempty"`
+	Message   string            `json:"message,omitempty"`
 	PodStatus *corev1.PodStatus `json:"podstatus,omitempty"`
 }
 
