@@ -192,10 +192,7 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 	}
 
 	// update deployment status
-	pStatus := instance.Status.PodStatus
-	if pStatus != nil {
-		found.Status.DeepCopyInto(instance.Status.PodStatus)
-	}
+	instance.Status.PodStatus = found.Status.DeepCopy()
 	err = r.client.Status().Update(context.TODO(), found)
 
 	return reconcile.Result{}, err
