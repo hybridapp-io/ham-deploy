@@ -1,0 +1,109 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+  name: ham-deploy.v0.1.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: Operator is the Schema for the operators API
+      kind: Operator
+      name: operators.deploy.hybridapp.io
+      specDescriptors:
+      - displayName: Accept terms and conditions
+        path: license.accept
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
+      version: v1alpha1
+  displayName: Ham Deploy
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      clusterPermissions:
+      - rules:
+        - apiGroups:
+          - '*'
+          resources:
+          - '*'
+          verbs:
+          - '*'
+        - apiGroups:
+          - tools.hybridapp.io
+          resources:
+          - '*'
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - deploy.hybridapp.io
+          resources:
+          - '*'
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        serviceAccountName: ham-deploy
+      deployments:
+      - name: ham-deploy
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              name: ham-deploy
+          strategy: {}
+          template:
+            metadata:
+              labels:
+                name: ham-deploy
+            spec:
+              containers:
+              - command:
+                - ham-deploy
+                env:
+                - name: WATCH_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.annotations['olm.targetNamespaces']
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: OPERATOR_NAME
+                  value: ham-deploy
+                image: quay.io/hybridappio/ham-deploy
+                imagePullPolicy: Always
+                name: ham-deploy
+                resources: {}
+              serviceAccountName: ham-deploy
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - ""
+  maintainers:
+  - {}
+  maturity: alpha
+  provider: {}
+  version: 0.1.0

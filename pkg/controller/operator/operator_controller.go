@@ -111,6 +111,7 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
+
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
@@ -119,8 +120,27 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	// License must be accepted
 	if !instance.Spec.LicenseSpec.Accept {
-		licenseErr := errors.NewBadRequest("License must be accepted in order to proceed.")
-		klog.Error("License was not accepted.", licenseErr)
+		klog.Error("spec.license.accept = false")
+
+		instance.Status.Phase = deployv1alpha1.PhaseError
+		instance.Status.Message = "License was not accepted"
+		instance.Status.Reason = "LicenseAcceptFalse"
+		updateErr := r.client.Status().Update(context.TODO(), instance)
+		if updateErr != nil {
+			klog.Error("Failed to update status: ", updateErr)
+			return reconcile.Result{}, err
+		}
+
+		return reconcile.Result{}, nil
+	}
+
+	instance.Status.Phase = deployv1alpha1.PhasePending
+	instance.Status.Message = "License was accepted"
+	instance.Status.Reason = "LicenseAcceptTrue"
+	updateErr := r.client.Status().Update(context.TODO(), instance)
+	if updateErr != nil {
+		klog.Error("Failed to update status: ", updateErr)
+		return reconcile.Result{}, err
 	}
 
 	// Define a new Pod object
@@ -144,6 +164,15 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 			return reconcile.Result{}, err
 		}
 
+		instance.Status.Phase = deployv1alpha1.PhaseInstalled
+		instance.Status.Message = ""
+		instance.Status.Reason = ""
+		updateErr := r.client.Status().Update(context.TODO(), instance)
+		if updateErr != nil {
+			klog.Error("Failed to update status: ", updateErr)
+			return reconcile.Result{}, err
+		}
+
 		// Pod created successfully - don't requeue
 		return reconcile.Result{}, nil
 	} else if err != nil {
@@ -156,7 +185,7 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 	if !uptodate {
 		err = r.client.Delete(context.TODO(), found)
 		if err != nil {
-			klog.Error("Failed to delete existin pod with error:", err)
+			klog.Error("Failed to delete existing pod with error:", err)
 		}
 
 		return reconcile.Result{}, err
