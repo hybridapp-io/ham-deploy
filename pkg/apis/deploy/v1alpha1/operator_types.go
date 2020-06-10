@@ -16,15 +16,18 @@ package v1alpha1
 
 import (
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type GenericContainerSpec struct {
-	Enabled *bool    `json:"enabled,omitempty"`
-	Name    *string  `json:"name,omitempty"`
-	Image   *string  `json:"image,omitempty"`
-	Command []string `json:"command,omitempty"`
-	Args    []string `json:"args,omitempty"`
+	Enabled         *bool                        `json:"enabled,omitempty"`
+	Name            *string                      `json:"name,omitempty"`
+	Image           *string                      `json:"image,omitempty"`
+	ImagePullPolicy *corev1.PullPolicy           `json:"imagePullPolicy,omitempty"`
+	Resources       *corev1.ResourceRequirements `json:"resources,omitempty"`
+	Command         []string                     `json:"command,omitempty"`
+	Args            []string                     `json:"args,omitempty"`
 }
 
 var (
@@ -36,9 +39,20 @@ var (
 )
 
 var (
-	DefaultDeployableEnablement       = true
-	DefaultDeployableContainerName    = "deployable"
-	DefaultDeployableContainerImage   = "quay.io/hybridappio/ham-deployable-operator"
+	DefaultDeployableEnablement               = true
+	DefaultDeployableContainerName            = "deployable"
+	DefaultDeployableContainerImage           = "quay.io/hybridappio/ham-deployable-operator"
+	DefaultDeployableContainerImagePullPolicy = corev1.PullAlways
+	DefaultDeployableContainerResources       = corev1.ResourceRequirements{
+		Limits: corev1.ResourceList{
+			"cpu":    resource.MustParse("100m"),
+			"memory": resource.MustParse("512Mi"),
+		},
+		Requests: corev1.ResourceList{
+			"cpu":    resource.MustParse("50m"),
+			"memory": resource.MustParse("64Mi"),
+		},
+	}
 	DefaultDeployableContainerCommand = []string{"ham-deployable-operator"}
 )
 
@@ -47,9 +61,20 @@ type DeployableOperatorSpec struct {
 }
 
 var (
-	DefaultAssmeblerEnablement       = true
-	DefaultAssemblerContainerName    = "assembler"
-	DefaultAssemblerContainerImage   = "quay.io/hybridappio/ham-application-assembler"
+	DefaultAssmeblerEnablement               = true
+	DefaultAssemblerContainerName            = "assembler"
+	DefaultAssemblerContainerImage           = "quay.io/hybridappio/ham-application-assembler"
+	DefaultAssemblerContainerImagePullPolicy = corev1.PullAlways
+	DefaultAssemblerContainerResources       = corev1.ResourceRequirements{
+		Limits: corev1.ResourceList{
+			"cpu":    resource.MustParse("100m"),
+			"memory": resource.MustParse("512Mi"),
+		},
+		Requests: corev1.ResourceList{
+			"cpu":    resource.MustParse("50m"),
+			"memory": resource.MustParse("64Mi"),
+		},
+	}
 	DefaultAssemblerContainerCommand = []string{"ham-application-assembler"}
 )
 
@@ -58,9 +83,20 @@ type ApplicationAssemblerSpec struct {
 }
 
 var (
-	DefaultDiscovererEnablement       = true
-	DefaultDiscovererContainerName    = "discoverer"
-	DefaultDiscovererContainerImage   = "quay.io/hybridappio/ham-resource-discoverer"
+	DefaultDiscovererEnablement               = true
+	DefaultDiscovererContainerName            = "discoverer"
+	DefaultDiscovererContainerImage           = "quay.io/hybridappio/ham-resource-discoverer"
+	DefaultDiscovererContainerImagePullPolicy = corev1.PullAlways
+	DefaultDiscovererContainerResources       = corev1.ResourceRequirements{
+		Limits: corev1.ResourceList{
+			"cpu":    resource.MustParse("100m"),
+			"memory": resource.MustParse("512Mi"),
+		},
+		Requests: corev1.ResourceList{
+			"cpu":    resource.MustParse("50m"),
+			"memory": resource.MustParse("64Mi"),
+		},
+	}
 	DefaultDiscovererContainerCommand = []string{"ham-resource-discoverer"}
 
 	DefaultPodVolumeNameHubConnection = "hub-connection-config"

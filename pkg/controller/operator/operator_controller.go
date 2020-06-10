@@ -350,6 +350,14 @@ func isEqualContainer(oldctn, newctn *corev1.Container) bool {
 		return false
 	}
 
+	if !reflect.DeepEqual(oldctn.ImagePullPolicy, newctn.ImagePullPolicy) {
+		return false
+	}
+
+	if !reflect.DeepEqual(oldctn.Resources, newctn.Resources) {
+		return false
+	}
+
 	if !isEqualStringArray(oldctn.Command, newctn.Command) {
 		return false
 	}

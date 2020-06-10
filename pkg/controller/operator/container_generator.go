@@ -34,6 +34,14 @@ func (r *ReconcileOperator) configContainerByGenericSpec(spec *deployv1alpha1.Ge
 		ctn.Name = *spec.Name
 	}
 
+	if spec.ImagePullPolicy != nil {
+		ctn.ImagePullPolicy = *spec.ImagePullPolicy
+	}
+
+	if spec.Resources != nil {
+		ctn.Resources = *spec.Resources
+	}
+
 	if spec.Command != nil {
 		ctn.Command = spec.Command
 	}
