@@ -63,9 +63,11 @@ func (r *ReconcileOperator) generateDeployableContainer(spec *deployv1alpha1.Dep
 	envon := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyOPERATORNAME, Value: deployv1alpha1.DefaultDeployableContainerName}
 
 	ctn := &corev1.Container{
-		Name:    deployv1alpha1.DefaultDeployableContainerName,
-		Image:   deployv1alpha1.DefaultDeployableContainerImage,
-		Command: deployv1alpha1.DefaultDeployableContainerCommand,
+		Name:            deployv1alpha1.DefaultDeployableContainerName,
+		Image:           deployv1alpha1.DefaultDeployableContainerImage,
+		ImagePullPolicy: deployv1alpha1.DefaultDeployableContainerImagePullPolicy,
+		Resources:       deployv1alpha1.DefaultDeployableContainerResources,
+		Command:         deployv1alpha1.DefaultDeployableContainerCommand,
 		Env: []corev1.EnvVar{
 			envwatchns,
 			envpn,
@@ -87,9 +89,11 @@ func (r *ReconcileOperator) generateAssemblerContainer(spec *deployv1alpha1.Appl
 	envon := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyOPERATORNAME, Value: deployv1alpha1.DefaultAssemblerContainerName}
 
 	ctn := &corev1.Container{
-		Name:    deployv1alpha1.DefaultAssemblerContainerName,
-		Image:   deployv1alpha1.DefaultAssemblerContainerImage,
-		Command: deployv1alpha1.DefaultAssemblerContainerCommand,
+		Name:            deployv1alpha1.DefaultAssemblerContainerName,
+		Image:           deployv1alpha1.DefaultAssemblerContainerImage,
+		ImagePullPolicy: deployv1alpha1.DefaultAssemblerContainerImagePullPolicy,
+		Resources:       deployv1alpha1.DefaultAssemblerContainerResources,
+		Command:         deployv1alpha1.DefaultAssemblerContainerCommand,
 		Env: []corev1.EnvVar{
 			envwatchns,
 			envpn,
@@ -115,9 +119,11 @@ func (r *ReconcileOperator) generateDiscovererContainer(spec *deployv1alpha1.Res
 	envcns := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyCLUSTERNAMESPACE, Value: spec.ClusterNamespace}
 
 	ctn := &corev1.Container{
-		Name:    deployv1alpha1.DefaultDiscovererContainerName,
-		Image:   deployv1alpha1.DefaultDiscovererContainerImage,
-		Command: deployv1alpha1.DefaultDiscovererContainerCommand,
+		Name:            deployv1alpha1.DefaultDiscovererContainerName,
+		Image:           deployv1alpha1.DefaultDiscovererContainerImage,
+		ImagePullPolicy: deployv1alpha1.DefaultDiscovererContainerImagePullPolicy,
+		Resources:       deployv1alpha1.DefaultDiscovererContainerResources,
+		Command:         deployv1alpha1.DefaultDiscovererContainerCommand,
 		Env: []corev1.EnvVar{
 			envwatchns,
 			envpn,
