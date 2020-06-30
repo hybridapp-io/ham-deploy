@@ -3,6 +3,8 @@ kind: Operator
 metadata:
   name: simple
 spec:
+  license:
+    accept: true
   core:
     deployable:
       enabled: true
@@ -11,6 +13,5 @@ spec:
       enabled: true
     discoverer:
       enabled: false
-      clustername: toronto
-      clusternamespace: toronto-ns
+
 

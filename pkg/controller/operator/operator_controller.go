@@ -263,7 +263,7 @@ func (r *ReconcileOperator) configPodByToolsSpec(spec *deployv1alpha1.ToolsSpec,
 		pod.Spec.Containers = append(pod.Spec.Containers, *r.generateAssemblerContainer(aaspec, pod))
 	}
 
-	// add discoverer container only if spec.ToolsSpec.ResourceDiscovererSpec.Enabled =
+	// add discoverer container only if spec.ToolsSpec.ResourceDiscovererSpec.Enabled = true
 	exists = spec != nil && spec.ResourceDiscovererSpec != nil && spec.ResourceDiscovererSpec.Enabled != nil
 
 	if exists && *(spec.ResourceDiscovererSpec.Enabled) {

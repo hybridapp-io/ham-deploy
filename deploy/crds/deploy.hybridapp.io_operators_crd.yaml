@@ -213,9 +213,6 @@ spec:
                             https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                           type: object
                       type: object
-                  required:
-                  - clustername
-                  - clusternamespace
                   type: object
               type: object
           required:

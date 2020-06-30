@@ -83,7 +83,7 @@ type ApplicationAssemblerSpec struct {
 }
 
 var (
-	DefaultDiscovererEnablement               = true
+	DefaultDiscovererEnablement               = false
 	DefaultDiscovererContainerName            = "discoverer"
 	DefaultDiscovererContainerImage           = "quay.io/hybridappio/ham-resource-discoverer"
 	DefaultDiscovererContainerImagePullPolicy = corev1.PullAlways
@@ -116,8 +116,8 @@ type HubConnectionConfig struct {
 
 type ResourceDiscovererSpec struct {
 	GenericContainerSpec `json:",inline"`
-	ClusterName          string               `json:"clustername"`
-	ClusterNamespace     string               `json:"clusternamespace"`
+	ClusterName          *string              `json:"clustername,omitempty"`
+	ClusterNamespace     *string              `json:"clusternamespace,omitempty"`
 	HubConnectionConfig  *HubConnectionConfig `json:"hubconfig,omitempty"`
 }
 

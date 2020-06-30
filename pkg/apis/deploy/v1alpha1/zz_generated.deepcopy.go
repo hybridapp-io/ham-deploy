@@ -284,6 +284,16 @@ func (in *OperatorStatus) DeepCopy() *OperatorStatus {
 func (in *ResourceDiscovererSpec) DeepCopyInto(out *ResourceDiscovererSpec) {
 	*out = *in
 	in.GenericContainerSpec.DeepCopyInto(&out.GenericContainerSpec)
+	if in.ClusterName != nil {
+		in, out := &in.ClusterName, &out.ClusterName
+		*out = new(string)
+		**out = **in
+	}
+	if in.ClusterNamespace != nil {
+		in, out := &in.ClusterNamespace, &out.ClusterNamespace
+		*out = new(string)
+		**out = **in
+	}
 	if in.HubConnectionConfig != nil {
 		in, out := &in.HubConnectionConfig, &out.HubConnectionConfig
 		*out = new(HubConnectionConfig)

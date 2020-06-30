@@ -48,6 +48,8 @@ var (
 	single                 = 1
 	falsevalue             = false
 	truevalue              = true
+	clusterName            = "default"
+	clusterNameSpace       = "default"
 )
 
 func TestReconcile(t *testing.T) {
@@ -160,6 +162,8 @@ func TestDiscoverer(t *testing.T) {
 					GenericContainerSpec: deployv1alpha1.GenericContainerSpec{
 						Enabled: &truevalue,
 					},
+					ClusterName:      &clusterName,
+					ClusterNamespace: &clusterNameSpace,
 				},
 			},
 		},

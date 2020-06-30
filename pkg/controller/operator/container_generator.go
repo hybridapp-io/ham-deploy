@@ -115,8 +115,16 @@ func (r *ReconcileOperator) generateDiscovererContainer(spec *deployv1alpha1.Res
 	envon := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyOPERATORNAME, Value: deployv1alpha1.DefaultDiscovererContainerName}
 
 	// apply required env var cluster name and cluster namespace
-	envcn := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyCLUSTERNAME, Value: spec.ClusterName}
-	envcns := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyCLUSTERNAMESPACE, Value: spec.ClusterNamespace}
+	var cn, cns string
+	if spec.ClusterName != nil {
+		cn = *spec.ClusterName
+	}
+	envcn := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyCLUSTERNAME, Value: cn}
+
+	if spec.ClusterNamespace != nil {
+		cns = *spec.ClusterNamespace
+	}
+	envcns := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyCLUSTERNAMESPACE, Value: cns}
 
 	ctn := &corev1.Container{
 		Name:            deployv1alpha1.DefaultDiscovererContainerName,
