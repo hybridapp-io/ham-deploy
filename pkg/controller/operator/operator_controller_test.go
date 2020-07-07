@@ -50,11 +50,11 @@ var (
 
 	defaultContainerNumber = 2
 	singleContainer        = 1
-	
-	falsevalue             = false
-	truevalue              = true
-	clusterName            = "default"
-	clusterNameSpace       = "default"
+
+	falsevalue       = false
+	truevalue        = true
+	clusterName      = "default"
+	clusterNameSpace = "default"
 )
 
 func TestReconcile(t *testing.T) {
@@ -234,7 +234,7 @@ func TestRefuseLicense(t *testing.T) {
 	podKey := types.NamespacedName{
 		Name:      request.Name + "-pod",
 		Namespace: request.Namespace,
-	} 
+	}
 
 	err = c.Get(context.TODO(), podKey, pod)
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())
