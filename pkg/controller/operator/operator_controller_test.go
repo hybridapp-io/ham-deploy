@@ -51,17 +51,17 @@ var (
 	defaultContainerNumber = 2
 	singleContainer        = 1
 
-	falsevalue       = false
-	truevalue        = true
-	
+	falsevalue = false
+	truevalue  = true
+
 	clusterName      = "default"
 	clusterNameSpace = "default"
-	hubKubeConfig = "/path/to/kubeconfig"
+	hubKubeConfig    = "/path/to/kubeconfig"
 
 	hubcc = deployv1alpha1.HubConnectionConfig{
 		KubeConfig: &hubKubeConfig,
-		MountPath: "/path/to/secret",
-		SecretRef: corev1.LocalObjectReference {
+		MountPath:  "/path/to/secret",
+		SecretRef: corev1.LocalObjectReference{
 			Name: "kubeconfig",
 		},
 	}
@@ -177,8 +177,8 @@ func TestDiscoverer(t *testing.T) {
 					GenericContainerSpec: deployv1alpha1.GenericContainerSpec{
 						Enabled: &truevalue,
 					},
-					ClusterName:      &clusterName,
-					ClusterNamespace: &clusterNameSpace,
+					ClusterName:         &clusterName,
+					ClusterNamespace:    &clusterNameSpace,
 					HubConnectionConfig: &hubcc,
 				},
 			},
