@@ -53,8 +53,18 @@ var (
 
 	falsevalue       = false
 	truevalue        = true
+	
 	clusterName      = "default"
 	clusterNameSpace = "default"
+	hubKubeConfig = "/path/to/kubeconfig"
+
+	hubcc = deployv1alpha1.HubConnectionConfig{
+		KubeConfig: &hubKubeConfig,
+		MountPath: "/path/to/secret",
+		SecretRef: corev1.LocalObjectReference {
+			Name: "kubeconfig",
+		},
+	}
 )
 
 func TestReconcile(t *testing.T) {
@@ -169,6 +179,7 @@ func TestDiscoverer(t *testing.T) {
 					},
 					ClusterName:      &clusterName,
 					ClusterNamespace: &clusterNameSpace,
+					HubConnectionConfig: &hubcc,
 				},
 			},
 		},
