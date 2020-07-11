@@ -118,6 +118,10 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 		return reconcile.Result{}, err
 	}
 
+	if instance.Status.Phase == "" {
+		instance.Status.Phase = deployv1alpha1.PhasePending
+	}
+
 	// License must be accepted
 	if !instance.Spec.LicenseSpec.Accept {
 		klog.Error("spec.license.accept = false")
@@ -133,16 +137,7 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 
 		return reconcile.Result{}, nil
 	}
-
-	instance.Status.Phase = deployv1alpha1.PhasePending
-	instance.Status.Message = "License was accepted"
-	instance.Status.Reason = "LicenseAcceptTrue"
-	updateErr := r.client.Status().Update(context.TODO(), instance)
-	if updateErr != nil {
-		klog.Error("Failed to update status: ", updateErr)
-		return reconcile.Result{}, err
-	}
-
+	
 	// Define a new Pod object
 	pod := r.newPodForCR(instance)
 
@@ -167,6 +162,7 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 		instance.Status.Phase = deployv1alpha1.PhaseInstalled
 		instance.Status.Message = ""
 		instance.Status.Reason = ""
+		instance.Status.PodStatus = found.Status.DeepCopy()
 		updateErr := r.client.Status().Update(context.TODO(), instance)
 		if updateErr != nil {
 			klog.Error("Failed to update status: ", updateErr)
@@ -188,12 +184,16 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 			klog.Error("Failed to delete existing pod with error:", err)
 		}
 
+		instance.Status.Phase = deployv1alpha1.PhasePending
+		instance.Status.Message = ""
+		instance.Status.Reason = ""
+		instance.Status.PodStatus = found.Status.DeepCopy()
 		return reconcile.Result{}, err
 	}
 
 	// update deployment status
 	instance.Status.PodStatus = found.Status.DeepCopy()
-	err = r.client.Status().Update(context.TODO(), found)
+	err = r.client.Status().Update(context.TODO(), instance)
 
 	return reconcile.Result{}, err
 }
@@ -275,7 +275,7 @@ func (r *ReconcileOperator) configPodByToolsSpec(spec *deployv1alpha1.ToolsSpec,
 	return pod
 }
 
-// newPodForCR returns a busybox pod with the same name/namespace as the cr
+// newPodForCR returns a pod with the same name/namespace as the cr
 func (r *ReconcileOperator) newPodForCR(cr *deployv1alpha1.Operator) *corev1.Pod {
 	pod := r.createBasicPod(cr)
 
