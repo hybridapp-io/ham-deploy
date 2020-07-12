@@ -182,9 +182,11 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 	}
 
 	// update deployment status
-	instance.Status.Phase = deployv1alpha1.PhaseInstalled
-	instance.Status.Message = ""
-	instance.Status.Reason = ""
+	if instance.Status.Phase != deployv1alpha1.PhaseInstalled {
+		instance.Status.Phase = deployv1alpha1.PhaseInstalled
+		instance.Status.Message = ""
+		instance.Status.Reason = ""
+	}
 	instance.Status.PodStatus = found.Status.DeepCopy()
 	err = r.client.Status().Update(context.TODO(), instance)
 
