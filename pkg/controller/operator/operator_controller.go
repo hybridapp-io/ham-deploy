@@ -122,9 +122,13 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 		return reconcile.Result{}, err
 	}
 
+	if instance.Status.Phase == "" {
+		instance.Status.Phase = deployv1alpha1.PhasePending
+	}
+
 	// License must be accepted
 	if !instance.Spec.LicenseSpec.Accept {
-		klog.Error("spec.license.accept = false")
+		klog.Warning("License was not accepted. (spec.license.accept = false)")
 
 		instance.Status.Phase = deployv1alpha1.PhaseError
 		instance.Status.Message = "License was not accepted"
@@ -132,19 +136,10 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 		updateErr := r.client.Status().Update(context.TODO(), instance)
 		if updateErr != nil {
 			klog.Error("Failed to update status: ", updateErr)
-			return reconcile.Result{}, err
+			return reconcile.Result{}, updateErr
 		}
 
 		return reconcile.Result{}, nil
-	}
-
-	instance.Status.Phase = deployv1alpha1.PhasePending
-	instance.Status.Message = "License was accepted"
-	instance.Status.Reason = "LicenseAcceptTrue"
-	updateErr := r.client.Status().Update(context.TODO(), instance)
-	if updateErr != nil {
-		klog.Error("Failed to update status: ", updateErr)
-		return reconcile.Result{}, err
 	}
 
 	// Define a new Pod object
@@ -168,15 +163,6 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 			return reconcile.Result{}, err
 		}
 
-		instance.Status.Phase = deployv1alpha1.PhaseInstalled
-		instance.Status.Message = ""
-		instance.Status.Reason = ""
-		updateErr := r.client.Status().Update(context.TODO(), instance)
-		if updateErr != nil {
-			klog.Error("Failed to update status: ", updateErr)
-			return reconcile.Result{}, err
-		}
-
 		// Pod created successfully - don't requeue
 		return reconcile.Result{}, nil
 	} else if err != nil {
@@ -196,8 +182,11 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 	}
 
 	// update deployment status
+	instance.Status.Phase = deployv1alpha1.PhaseInstalled
+	instance.Status.Message = ""
+	instance.Status.Reason = ""
 	instance.Status.PodStatus = found.Status.DeepCopy()
-	err = r.client.Status().Update(context.TODO(), found)
+	err = r.client.Status().Update(context.TODO(), instance)
 
 	return reconcile.Result{}, err
 }

@@ -44,6 +44,10 @@ var (
 		Accept: true,
 	}
 
+	refuseLicense = deployv1alpha1.LicenseSpec{
+		Accept: false,
+	}
+
 	defaultContainerNumber = 2
 	single                 = 1
 	falsevalue             = false
@@ -142,9 +146,7 @@ func TestDiscoverer(t *testing.T) {
 			Namespace: request.Namespace,
 		},
 		Spec: deployv1alpha1.OperatorSpec{
-			LicenseSpec: &deployv1alpha1.LicenseSpec{
-				Accept: true,
-			},
+			LicenseSpec: &acceptLicense,
 			CoreSpec: &deployv1alpha1.CoreSpec{
 				DeployableOperatorSpec: &deployv1alpha1.DeployableOperatorSpec{
 					GenericContainerSpec: deployv1alpha1.GenericContainerSpec{
@@ -194,4 +196,45 @@ func TestDiscoverer(t *testing.T) {
 
 	err = c.Get(context.TODO(), podKey, pod)
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())
+}
+
+func TestRefuseLicense(t *testing.T) {
+	g := NewWithT(t)
+
+	var c client.Client
+
+	// Setup the Manager and Controller.  Wrap the Controller Reconcile function so it writes each request to a
+	// channel when it is finished.
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
+	g.Expect(err).NotTo(HaveOccurred())
+
+	c = mgr.GetClient()
+
+	rec := newReconciler(mgr)
+	g.Expect(add(mgr, rec)).To(Succeed())
+
+	stopMgr, mgrStopped := StartTestManager(mgr, g)
+
+	defer func() {
+		close(stopMgr)
+		mgrStopped.Wait()
+	}()
+
+	deploy := &deployv1alpha1.Operator{}
+	deploy.Name = request.Name
+	deploy.Namespace = request.Namespace
+	deploy.Spec.LicenseSpec = &refuseLicense
+
+	g.Expect(c.Create(context.TODO(), deploy)).To(Succeed())
+
+	pod := &corev1.Pod{}
+	podKey := types.NamespacedName{
+		Name:      request.Name + "-pod",
+		Namespace: request.Namespace,
+	}
+
+	err = c.Get(context.TODO(), podKey, pod)
+	g.Expect(errors.IsNotFound(err)).To(BeTrue())
+
+	c.Delete(context.TODO(), deploy)
 }
