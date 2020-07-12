@@ -268,7 +268,7 @@ func (r *ReconcileOperator) configPodByToolsSpec(spec *deployv1alpha1.ToolsSpec,
 	return pod
 }
 
-// newPodForCR returns a busybox pod with the same name/namespace as the cr
+// newPodForCR returns a pod with the same name/namespace as the cr
 func (r *ReconcileOperator) newPodForCR(cr *deployv1alpha1.Operator) *corev1.Pod {
 	pod := r.createBasicPod(cr)
 
