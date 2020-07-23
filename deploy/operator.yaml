@@ -16,7 +16,7 @@ spec:
       containers:
         - name: ham-deploy
           # Replace this with the built image name
-          image: REPLACE_IMAGE
+          image: quay.io/hybridappio/ham-deploy:latest
           command:
           - ham-deploy
           imagePullPolicy: Always
