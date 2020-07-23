@@ -21,8 +21,8 @@ import (
 	deployv1alpha1 "github.com/hybridapp-io/ham-deploy/pkg/apis/deploy/v1alpha1"
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 
-	corev1 "k8s.io/api/core/v1"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -183,7 +183,6 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 		return reconcile.Result{}, err
 	}
 
-
 	if *rs.Spec.Replicas != *found.Spec.Replicas {
 		found.Spec.Replicas = rs.Spec.Replicas
 
@@ -213,7 +212,7 @@ func (r *ReconcileOperator) createReplicaSet(cr *deployv1alpha1.Operator) *appsv
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cr.Name,
 			Namespace: cr.Namespace,
-			Labels: cr.Labels,
+			Labels:    cr.Labels,
 		},
 	}
 
@@ -225,11 +224,11 @@ func (r *ReconcileOperator) createReplicaSet(cr *deployv1alpha1.Operator) *appsv
 
 	rs.Spec.Template.Name = cr.Name
 	rs.Spec.Selector = &metav1.LabelSelector{
-		MatchLabels: map[string]string{"app":cr.Name},
+		MatchLabels: map[string]string{"app": cr.Name},
 	}
 
 	if cr.Labels == nil {
-		rs.Spec.Template.Labels = map[string]string{"app":cr.Name}
+		rs.Spec.Template.Labels = map[string]string{"app": cr.Name}
 	} else {
 		rs.Spec.Template.Labels = cr.Labels
 		rs.Spec.Template.Labels["app"] = cr.Name
@@ -267,7 +266,7 @@ func (r *ReconcileOperator) configPodByCoreSpec(spec *deployv1alpha1.CoreSpec, r
 			dospec = &deployv1alpha1.DeployableOperatorSpec{}
 		}
 
-		rs.Spec.Template.Spec.Containers = append(rs.Spec.Template.Spec.Containers, *r.generateDeployableContainer(dospec, rs))
+		rs.Spec.Template.Spec.Containers = append(rs.Spec.Template.Spec.Containers, *r.generateDeployableContainer(dospec))
 	}
 
 	return rs
@@ -289,7 +288,7 @@ func (r *ReconcileOperator) configPodByToolsSpec(spec *deployv1alpha1.ToolsSpec,
 			aaspec = &deployv1alpha1.ApplicationAssemblerSpec{}
 		}
 
-		rs.Spec.Template.Spec.Containers = append(rs.Spec.Template.Spec.Containers, *r.generateAssemblerContainer(aaspec, rs))
+		rs.Spec.Template.Spec.Containers = append(rs.Spec.Template.Spec.Containers, *r.generateAssemblerContainer(aaspec))
 	}
 
 	// add discoverer container only if spec.ToolsSpec.ResourceDiscovererSpec.Enabled =
@@ -423,5 +422,3 @@ func isEqualStringArray(sa1, sa2 []string) bool {
 
 	return len(samap1) == 0
 }
-
-func int32Ptr(i int32) *int32 { return &i }

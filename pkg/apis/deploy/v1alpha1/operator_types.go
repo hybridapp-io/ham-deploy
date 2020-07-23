@@ -142,7 +142,7 @@ type LicenseSpec struct {
 
 // OperatorSpec defines the desired state of Operator
 type OperatorSpec struct {
-	Replicas *int32 `json:"replicas,omitempty"`
+	Replicas    *int32       `json:"replicas,omitempty"`
 	LicenseSpec *LicenseSpec `json:"license"`
 	CoreSpec    *CoreSpec    `json:"core,omitempty"`
 	ToolsSpec   *ToolsSpec   `json:"tools,omitempty"`

@@ -12,7 +12,7 @@ spec:
       imagePullPolicy: Always
   tools:
     assembler:
-      enabled: true
+      enabled: false
       imagePullPolicy: Always
     discoverer:
       enabled: false
