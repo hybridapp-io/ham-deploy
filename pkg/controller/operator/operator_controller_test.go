@@ -383,7 +383,6 @@ func TestReplicaNumberChange(t *testing.T) {
 	g.Expect(c.Get(context.TODO(), rsKey, rs)).To(Succeed())
 	g.Expect(*rs.Spec.Replicas == deployv1alpha1.DefaultReplicas).To(BeTrue())
 
-
 	//increase replica count
 	replicas := int32(3)
 	g.Expect(c.Get(context.TODO(), request, deploy)).To(Succeed())
@@ -408,4 +407,3 @@ func TestReplicaNumberChange(t *testing.T) {
 	err = c.Get(context.TODO(), rsKey, rs)
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())
 }
-
