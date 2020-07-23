@@ -223,14 +223,17 @@ func (r *ReconcileOperator) createReplicaSet(cr *deployv1alpha1.Operator) *appsv
 		rs.Spec.Replicas = cr.Spec.Replicas
 	}
 
-	podlbl := map[string]string{"app":cr.Name}
-
 	rs.Spec.Template.Name = cr.Name
 	rs.Spec.Selector = &metav1.LabelSelector{
-		MatchLabels: podlbl,
+		MatchLabels: map[string]string{"app":cr.Name},
 	}
 
-	rs.Spec.Template.Labels = map[string]string{"app":cr.Name}
+	if cr.Labels == nil {
+		rs.Spec.Template.Labels = map[string]string{"app":cr.Name}
+	} else {
+		rs.Spec.Template.Labels = cr.Labels
+		rs.Spec.Template.Labels["app"] = cr.Name
+	}
 
 	rs.Spec.Template.Spec.ServiceAccountName = deployv1alpha1.DefaultPodServiceAccountName
 

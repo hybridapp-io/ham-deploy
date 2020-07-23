@@ -1,11 +1,7 @@
 apiVersion: deploy.hybridapp.io/v1alpha1
 kind: Operator
 metadata:
-  name: cp4mcm-hybridapp
-  labels:
-    app.kubernetes.io/instance: ibm-management-hybridapp
-    app.kubernetes.io/managed-by: ibm-management-hybridapp
-    app.kubernetes.io/name: hybrid-application-model
+  name: hybridapp
 spec:
   replicas: 2
   license:
