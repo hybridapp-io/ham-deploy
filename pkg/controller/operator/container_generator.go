@@ -17,6 +17,7 @@ package operator
 import (
 	deployv1alpha1 "github.com/hybridapp-io/ham-deploy/pkg/apis/deploy/v1alpha1"
 	"github.com/hybridapp-io/ham-deploy/pkg/utils"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -53,13 +54,19 @@ func (r *ReconcileOperator) configContainerByGenericSpec(spec *deployv1alpha1.Ge
 	return ctn
 }
 
-func (r *ReconcileOperator) generateDeployableContainer(spec *deployv1alpha1.DeployableOperatorSpec, pod *corev1.Pod) *corev1.Container {
+func (r *ReconcileOperator) generateDeployableContainer(spec *deployv1alpha1.DeployableOperatorSpec, rs *appsv1.ReplicaSet) *corev1.Container {
 	if spec == nil {
 		return nil
 	}
 
 	envwatchns := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyWATCHNAMESPACE, Value: ""}
-	envpn := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyPODNAME, Value: pod.Name}
+	envpn := corev1.EnvVar{
+		Name: deployv1alpha1.ContainerEnvVarKeyPODNAME, ValueFrom: &corev1.EnvVarSource{
+			FieldRef: &corev1.ObjectFieldSelector{
+				FieldPath: "metadata.name",
+			},
+		},
+	}
 	envon := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyOPERATORNAME, Value: deployv1alpha1.DefaultDeployableContainerName}
 
 	ctn := &corev1.Container{
@@ -83,9 +90,15 @@ func (r *ReconcileOperator) generateDeployableContainer(spec *deployv1alpha1.Dep
 	return ctn
 }
 
-func (r *ReconcileOperator) generateAssemblerContainer(spec *deployv1alpha1.ApplicationAssemblerSpec, pod *corev1.Pod) *corev1.Container {
+func (r *ReconcileOperator) generateAssemblerContainer(spec *deployv1alpha1.ApplicationAssemblerSpec, rs *appsv1.ReplicaSet) *corev1.Container {
 	envwatchns := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyWATCHNAMESPACE, Value: ""}
-	envpn := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyPODNAME, Value: pod.Name}
+	envpn := corev1.EnvVar{
+		Name: deployv1alpha1.ContainerEnvVarKeyPODNAME, ValueFrom: &corev1.EnvVarSource{
+			FieldRef: &corev1.ObjectFieldSelector{
+				FieldPath: "metadata.name",
+			},
+		},
+	}
 	envon := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyOPERATORNAME, Value: deployv1alpha1.DefaultAssemblerContainerName}
 
 	ctn := &corev1.Container{
@@ -109,9 +122,16 @@ func (r *ReconcileOperator) generateAssemblerContainer(spec *deployv1alpha1.Appl
 	return ctn
 }
 
-func (r *ReconcileOperator) generateDiscovererContainer(spec *deployv1alpha1.ResourceDiscovererSpec, pod *corev1.Pod) *corev1.Container {
+func (r *ReconcileOperator) generateDiscovererContainer(spec *deployv1alpha1.ResourceDiscovererSpec, rs *appsv1.ReplicaSet) *corev1.Container {
 	envwatchns := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyWATCHNAMESPACE, Value: ""}
-	envpn := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyPODNAME, Value: pod.Name}
+	envpn := corev1.EnvVar{
+		Name: deployv1alpha1.ContainerEnvVarKeyPODNAME, ValueFrom: &corev1.EnvVarSource{
+			FieldRef: &corev1.ObjectFieldSelector{
+				FieldPath: "metadata.name",
+			},
+		},
+	}
+
 	envon := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyOPERATORNAME, Value: deployv1alpha1.DefaultDiscovererContainerName}
 
 	// apply required env var cluster name and cluster namespace
@@ -168,7 +188,7 @@ func (r *ReconcileOperator) generateDiscovererContainer(spec *deployv1alpha1.Res
 					},
 				},
 			}
-			pod.Spec.Volumes = append(pod.Spec.Volumes, secvol)
+			rs.Spec.Template.Spec.Volumes =  append(rs.Spec.Template.Spec.Volumes, secvol)
 			// set up mount
 
 			volm := corev1.VolumeMount{

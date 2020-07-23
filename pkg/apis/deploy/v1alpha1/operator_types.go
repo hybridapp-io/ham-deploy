@@ -15,6 +15,7 @@
 package v1alpha1
 
 import (
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -36,6 +37,8 @@ var (
 	ContainerEnvVarKeyOPERATORNAME   = "OPERATOR_NAME"
 
 	DefaultPodServiceAccountName = "ham-deploy"
+
+	DefaultReplicas = int32(1)
 )
 
 var (
@@ -139,6 +142,7 @@ type LicenseSpec struct {
 
 // OperatorSpec defines the desired state of Operator
 type OperatorSpec struct {
+	Replicas *int32 `json:"replicas,omitempty"`
 	LicenseSpec *LicenseSpec `json:"license"`
 	CoreSpec    *CoreSpec    `json:"core,omitempty"`
 	ToolsSpec   *ToolsSpec   `json:"tools,omitempty"`
@@ -155,10 +159,10 @@ const (
 // OperatorStatus defines the observed state of Operator
 type OperatorStatus struct {
 	// +kubebuilder:validation:Enum=Installed;Pending;Error
-	Phase     Phase             `json:"phase,omitempty"`
-	Reason    string            `json:"reason,omitempty"`
-	Message   string            `json:"message,omitempty"`
-	PodStatus *corev1.PodStatus `json:"podstatus,omitempty"`
+	Phase            Phase                    `json:"phase,omitempty"`
+	Reason           string                   `json:"reason,omitempty"`
+	Message          string                   `json:"message,omitempty"`
+	ReplicaSetStatus *appsv1.ReplicaSetStatus `json:"replicasetstatus,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

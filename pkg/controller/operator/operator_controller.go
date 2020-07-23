@@ -22,6 +22,7 @@ import (
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 
 	corev1 "k8s.io/api/core/v1"
+	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -78,7 +79,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to secondary resource Pods and requeue the owner Operator
-	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
+	err = c.Watch(&source.Kind{Type: &appsv1.ReplicaSet{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &deployv1alpha1.Operator{},
 	})
@@ -142,42 +143,56 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 		return reconcile.Result{}, nil
 	}
 
-	// Define a new Pod object
-	pod := r.newPodForCR(instance)
+	// Define a new ReplicaSet object
+	rs := r.newReplicaSetForCR(instance)
 
 	// Set Operator instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, pod, r.scheme); err != nil {
+	if err := controllerutil.SetControllerReference(instance, rs, r.scheme); err != nil {
+		klog.Error("Failed to set owner on ReplicaSet: ", rs.Name, " Namespace:", rs.Namespace)
 		return reconcile.Result{}, err
 	}
 
-	// Check if this Pod already exists
-	found := &corev1.Pod{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: pod.Name, Namespace: pod.Namespace}, found)
+	// Check if this ReplicaSet already exists
+	found := &appsv1.ReplicaSet{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: rs.Name, Namespace: rs.Namespace}, found)
 
 	if err != nil && errors.IsNotFound(err) {
-		klog.Info("Creating a new Pod Namespace:", pod.Namespace, " Name:", pod.Name)
-		err = r.client.Create(context.TODO(), pod)
+		klog.Info("Creating a new Replicaset: ", rs.Name, " Namespace: ", rs.Namespace)
+		err = r.client.Create(context.TODO(), rs)
 
 		if err != nil {
-			klog.Error("Failed to create new pod, error:", err)
+			klog.Error("Failed to create new ReplicaSet, error:", err)
 			return reconcile.Result{}, err
 		}
 
-		// Pod created successfully - don't requeue
+		// ReplicaSet created successfully - don't requeue
 		return reconcile.Result{}, nil
 	} else if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	// Pod already exists - try to update
-	uptodate := isEqualPod(found, pod)
+	// ReplicaSet already exists - try to update
+	uptodate := isEqualReplicaSetPods(found, rs)
 
 	if !uptodate {
+		klog.Info("Pod has changed; deleting Replicaset: ", rs.Name, " Namespace: ", rs.Namespace)
 		err = r.client.Delete(context.TODO(), found)
 		if err != nil {
-			klog.Error("Failed to delete existing pod with error:", err)
+			klog.Error("Failed to delete existing replica, error:", err)
 		}
+		return reconcile.Result{}, err
+	}
 
+
+	if *rs.Spec.Replicas != *found.Spec.Replicas {
+		found.Spec.Replicas = rs.Spec.Replicas
+
+		klog.Info("Updating # of replicas for Replicaset: ", rs.Name, " Namespace: ", rs.Namespace)
+		err = r.client.Update(context.TODO(), found)
+
+		if err != nil {
+			klog.Error("Failed to update # of replicas, error:", err)
+		}
 		return reconcile.Result{}, err
 	}
 
@@ -187,21 +202,37 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 		instance.Status.Message = ""
 		instance.Status.Reason = ""
 	}
-	instance.Status.PodStatus = found.Status.DeepCopy()
+	instance.Status.ReplicaSetStatus = found.Status.DeepCopy()
 	err = r.client.Status().Update(context.TODO(), instance)
 
 	return reconcile.Result{}, err
 }
 
-func (r *ReconcileOperator) createBasicPod(cr *deployv1alpha1.Operator) *corev1.Pod {
-	pod := &corev1.Pod{
+func (r *ReconcileOperator) createReplicaSet(cr *deployv1alpha1.Operator) *appsv1.ReplicaSet {
+	rs := &appsv1.ReplicaSet{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + "-pod",
+			Name:      cr.Name,
 			Namespace: cr.Namespace,
+			Labels: cr.Labels,
 		},
 	}
 
-	pod.Spec.ServiceAccountName = deployv1alpha1.DefaultPodServiceAccountName
+	if cr.Spec.Replicas == nil {
+		rs.Spec.Replicas = &deployv1alpha1.DefaultReplicas
+	} else {
+		rs.Spec.Replicas = cr.Spec.Replicas
+	}
+
+	podlbl := map[string]string{"app":cr.Name}
+
+	rs.Spec.Template.Name = cr.Name
+	rs.Spec.Selector = &metav1.LabelSelector{
+		MatchLabels: podlbl,
+	}
+
+	rs.Spec.Template.Labels = map[string]string{"app":cr.Name}
+
+	rs.Spec.Template.Spec.ServiceAccountName = deployv1alpha1.DefaultPodServiceAccountName
 
 	// inherit operator settings if possible
 	opns, err := k8sutil.GetOperatorNamespace()
@@ -210,14 +241,14 @@ func (r *ReconcileOperator) createBasicPod(cr *deployv1alpha1.Operator) *corev1.
 
 		if err == nil {
 			oppod.Spec.Containers = nil
-			oppod.Spec.DeepCopyInto(&pod.Spec)
+			oppod.Spec.DeepCopyInto(&rs.Spec.Template.Spec)
 		}
 	}
 
-	return pod
+	return rs
 }
 
-func (r *ReconcileOperator) configPodByCoreSpec(spec *deployv1alpha1.CoreSpec, pod *corev1.Pod) *corev1.Pod {
+func (r *ReconcileOperator) configPodByCoreSpec(spec *deployv1alpha1.CoreSpec, rs *appsv1.ReplicaSet) *appsv1.ReplicaSet {
 	var exists, implied bool
 
 	// add deployable container unless spec.CoreSpec.DeployableOperatorSpec.Enabled = false
@@ -233,13 +264,13 @@ func (r *ReconcileOperator) configPodByCoreSpec(spec *deployv1alpha1.CoreSpec, p
 			dospec = &deployv1alpha1.DeployableOperatorSpec{}
 		}
 
-		pod.Spec.Containers = append(pod.Spec.Containers, *r.generateDeployableContainer(dospec, pod))
+		rs.Spec.Template.Spec.Containers = append(rs.Spec.Template.Spec.Containers, *r.generateDeployableContainer(dospec, rs))
 	}
 
-	return pod
+	return rs
 }
 
-func (r *ReconcileOperator) configPodByToolsSpec(spec *deployv1alpha1.ToolsSpec, pod *corev1.Pod) *corev1.Pod {
+func (r *ReconcileOperator) configPodByToolsSpec(spec *deployv1alpha1.ToolsSpec, rs *appsv1.ReplicaSet) *appsv1.ReplicaSet {
 	var exists, implied bool
 
 	// add assembler container unless spec.ToolsSpec.ApplicationAssemblerSpec.Enabled = false
@@ -255,7 +286,7 @@ func (r *ReconcileOperator) configPodByToolsSpec(spec *deployv1alpha1.ToolsSpec,
 			aaspec = &deployv1alpha1.ApplicationAssemblerSpec{}
 		}
 
-		pod.Spec.Containers = append(pod.Spec.Containers, *r.generateAssemblerContainer(aaspec, pod))
+		rs.Spec.Template.Spec.Containers = append(rs.Spec.Template.Spec.Containers, *r.generateAssemblerContainer(aaspec, rs))
 	}
 
 	// add discoverer container only if spec.ToolsSpec.ResourceDiscovererSpec.Enabled =
@@ -264,34 +295,34 @@ func (r *ReconcileOperator) configPodByToolsSpec(spec *deployv1alpha1.ToolsSpec,
 	if exists && *(spec.ResourceDiscovererSpec.Enabled) {
 		rdspec := spec.ResourceDiscovererSpec
 
-		pod.Spec.Containers = append(pod.Spec.Containers, *r.generateDiscovererContainer(rdspec, pod))
+		rs.Spec.Template.Spec.Containers = append(rs.Spec.Template.Spec.Containers, *r.generateDiscovererContainer(rdspec, rs))
 	}
 
-	return pod
+	return rs
 }
 
 // newPodForCR returns a pod with the same name/namespace as the cr
-func (r *ReconcileOperator) newPodForCR(cr *deployv1alpha1.Operator) *corev1.Pod {
-	pod := r.createBasicPod(cr)
+func (r *ReconcileOperator) newReplicaSetForCR(cr *deployv1alpha1.Operator) *appsv1.ReplicaSet {
+	rs := r.createReplicaSet(cr)
 
-	pod = r.configPodByCoreSpec(cr.Spec.CoreSpec, pod)
-	pod = r.configPodByToolsSpec(cr.Spec.ToolsSpec, pod)
+	rs = r.configPodByCoreSpec(cr.Spec.CoreSpec, rs)
+	rs = r.configPodByToolsSpec(cr.Spec.ToolsSpec, rs)
 
-	return pod
+	return rs
 }
 
-func isEqualPod(oldpod, newpod *corev1.Pod) bool {
-	if !isEqualVolumes(oldpod.Spec.Volumes, newpod.Spec.Volumes) {
+func isEqualReplicaSetPods(oldrs, newrs *appsv1.ReplicaSet) bool {
+	if !isEqualVolumes(oldrs.Spec.Template.Spec.Volumes, newrs.Spec.Template.Spec.Volumes) {
 		return false
 	}
 
 	// compare containers
 	oldctnmap := make(map[string]*corev1.Container)
-	for _, ctn := range oldpod.Spec.Containers {
+	for _, ctn := range oldrs.Spec.Template.Spec.Containers {
 		oldctnmap[ctn.Name] = ctn.DeepCopy()
 	}
 
-	for _, ctn := range newpod.Spec.Containers {
+	for _, ctn := range newrs.Spec.Template.Spec.Containers {
 		octn, ok := oldctnmap[ctn.Name]
 		if !ok {
 			return false
@@ -389,3 +420,5 @@ func isEqualStringArray(sa1, sa2 []string) bool {
 
 	return len(samap1) == 0
 }
+
+func int32Ptr(i int32) *int32 { return &i }

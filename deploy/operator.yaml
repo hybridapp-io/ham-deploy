@@ -16,10 +16,10 @@ spec:
       containers:
         - name: ham-deploy
           # Replace this with the built image name
-          image: quay.io/hybridappio/ham-deploy
+          image: ham-deploy
           command:
           - ham-deploy
-          imagePullPolicy: Always
+          imagePullPolicy: Never
           env:
             - name: WATCH_NAMESPACE
               value: ""
