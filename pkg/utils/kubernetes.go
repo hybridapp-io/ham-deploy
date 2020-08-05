@@ -15,6 +15,7 @@
 package utils
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -75,12 +76,12 @@ func CheckAndInstallCRD(dcli dynamic.Interface, pathname string) error {
 		Version:  crdobj.GetObjectKind().GroupVersionKind().Version,
 	}
 
-	_, err = dcli.Resource(gvr).Get(crdobj.GetName(), metav1.GetOptions{})
+	_, err = dcli.Resource(gvr).Get(context.TODO(), crdobj.GetName(), metav1.GetOptions{})
 
 	if errors.IsNotFound(err) {
 		klog.Info("Installing SIG Application CRD from File: ", pathname)
 		// Install sig app
-		_, err = dcli.Resource(gvr).Create(crdobj, metav1.CreateOptions{})
+		_, err = dcli.Resource(gvr).Create(context.TODO(), crdobj, metav1.CreateOptions{})
 		if err != nil {
 			klog.Error("Creating CRD", err.Error())
 			return err
