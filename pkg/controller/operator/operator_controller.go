@@ -243,6 +243,7 @@ func (r *ReconcileOperator) createReplicaSet(cr *deployv1alpha1.Operator) *appsv
 
 		if err == nil {
 			oppod.Spec.Containers = nil
+			oppod.Spec.NodeName = ""
 			oppod.Spec.DeepCopyInto(&rs.Spec.Template.Spec)
 		}
 	}
