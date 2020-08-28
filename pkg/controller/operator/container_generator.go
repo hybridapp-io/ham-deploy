@@ -52,7 +52,7 @@ func (r *ReconcileOperator) configContainerByGenericSpec(spec *deployv1alpha1.Ge
 	}
 
 	runAsNonRoot := true
-	ctn.SecurityContext = &corev1.SecurityContext {
+	ctn.SecurityContext = &corev1.SecurityContext{
 		Capabilities: &corev1.Capabilities{
 			Drop: []corev1.Capability{
 				"ALL",
