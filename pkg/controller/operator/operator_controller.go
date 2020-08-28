@@ -212,7 +212,8 @@ func (r *ReconcileOperator) createReplicaSet(cr *deployv1alpha1.Operator) *appsv
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cr.Name,
 			Namespace: cr.Namespace,
-			Labels:    cr.Labels,
+			// Labels:    cr.Labels,
+			// Annotations: cr.Annotations,
 		},
 	}
 
@@ -232,6 +233,10 @@ func (r *ReconcileOperator) createReplicaSet(cr *deployv1alpha1.Operator) *appsv
 	} else {
 		rs.Spec.Template.Labels = cr.Labels
 		rs.Spec.Template.Labels["app"] = cr.Name
+	}
+
+	if cr.Annotations != nil {
+		rs.Spec.Template.Annotations = cr.Annotations
 	}
 
 	rs.Spec.Template.Spec.ServiceAccountName = deployv1alpha1.DefaultPodServiceAccountName
