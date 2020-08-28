@@ -212,8 +212,6 @@ func (r *ReconcileOperator) createReplicaSet(cr *deployv1alpha1.Operator) *appsv
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cr.Name,
 			Namespace: cr.Namespace,
-			// Labels:    cr.Labels,
-			// Annotations: cr.Annotations,
 		},
 	}
 
