@@ -47,7 +47,7 @@ var (
 		Accept: false,
 	}
 
-	defaultContainerNumber = 2
+	defaultContainerNumber = 3
 	single                 = 1
 	falsevalue             = false
 	truevalue              = true
@@ -138,7 +138,7 @@ func TestDiscoverer(t *testing.T) {
 		mgrStopped.Wait()
 	}()
 
-	// disable deployable container and assembler container to focus on discoverer
+	// disable deployable, assembler and placement container to focus on discoverer
 	deploy := &deployv1alpha1.Operator{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      request.Name,
@@ -148,6 +148,11 @@ func TestDiscoverer(t *testing.T) {
 			LicenseSpec: &acceptLicense,
 			CoreSpec: &deployv1alpha1.CoreSpec{
 				DeployableOperatorSpec: &deployv1alpha1.DeployableOperatorSpec{
+					GenericContainerSpec: deployv1alpha1.GenericContainerSpec{
+						Enabled: &falsevalue,
+					},
+				},
+				PlacementSpec: &deployv1alpha1.PlacementSpec{
 					GenericContainerSpec: deployv1alpha1.GenericContainerSpec{
 						Enabled: &falsevalue,
 					},
@@ -278,6 +283,11 @@ func TestPodChange(t *testing.T) {
 						Enabled: &truevalue,
 					},
 				},
+				PlacementSpec: &deployv1alpha1.PlacementSpec{
+					GenericContainerSpec: deployv1alpha1.GenericContainerSpec{
+						Enabled: &truevalue,
+					},
+				},
 			},
 			ToolsSpec: &deployv1alpha1.ToolsSpec{
 				ApplicationAssemblerSpec: &deployv1alpha1.ApplicationAssemblerSpec{
@@ -304,6 +314,7 @@ func TestPodChange(t *testing.T) {
 	//disable a container
 	g.Expect(c.Get(context.TODO(), request, deploy)).To(Succeed())
 	deploy.Spec.CoreSpec.DeployableOperatorSpec.GenericContainerSpec.Enabled = &falsevalue
+	deploy.Spec.CoreSpec.PlacementSpec.GenericContainerSpec.Enabled = &falsevalue
 	g.Expect(c.Update(context.TODO(), deploy)).To(Succeed())
 
 	time.Sleep(interval)
@@ -358,6 +369,11 @@ func TestReplicaNumberChange(t *testing.T) {
 				DeployableOperatorSpec: &deployv1alpha1.DeployableOperatorSpec{
 					GenericContainerSpec: deployv1alpha1.GenericContainerSpec{
 						Enabled: &truevalue,
+					},
+				},
+				PlacementSpec: &deployv1alpha1.PlacementSpec{
+					GenericContainerSpec: deployv1alpha1.GenericContainerSpec{
+						Enabled: &falsevalue,
 					},
 				},
 			},
