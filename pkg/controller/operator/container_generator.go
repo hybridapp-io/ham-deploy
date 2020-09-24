@@ -100,6 +100,42 @@ func (r *ReconcileOperator) generateDeployableContainer(spec *deployv1alpha1.Dep
 	return ctn
 }
 
+func (r *ReconcileOperator) generatePlacementContainer(spec *deployv1alpha1.PlacementSpec) *corev1.Container {
+	if spec == nil {
+		return nil
+	}
+
+	envwatchns := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyWATCHNAMESPACE, Value: ""}
+	envpn := corev1.EnvVar{
+		Name: deployv1alpha1.ContainerEnvVarKeyPODNAME, ValueFrom: &corev1.EnvVarSource{
+			FieldRef: &corev1.ObjectFieldSelector{
+				FieldPath: "metadata.name",
+			},
+		},
+	}
+	envon := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyOPERATORNAME, Value: deployv1alpha1.DefaultPlacementContainerName}
+
+	ctn := &corev1.Container{
+		Name:            deployv1alpha1.DefaultPlacementContainerName,
+		Image:           deployv1alpha1.DefaultPlacementContainerImage,
+		ImagePullPolicy: deployv1alpha1.DefaultPlacementContainerImagePullPolicy,
+		Resources:       deployv1alpha1.DefaultPlacementContainerResources,
+		Command:         deployv1alpha1.DefaultPlacementContainerCommand,
+		Env: []corev1.EnvVar{
+			envwatchns,
+			envpn,
+			envon,
+		},
+	}
+
+	// install crds for discoverer operator if missing
+	_ = utils.CheckAndInstallCRDs(r.dynamicClient, crdRootPath+crdPlacementSubPath)
+
+	ctn = r.configContainerByGenericSpec(&spec.GenericContainerSpec, ctn)
+
+	return ctn
+}
+
 func (r *ReconcileOperator) generateAssemblerContainer(spec *deployv1alpha1.ApplicationAssemblerSpec) *corev1.Container {
 	envwatchns := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyWATCHNAMESPACE, Value: ""}
 	envpn := corev1.EnvVar{
@@ -171,7 +207,7 @@ func (r *ReconcileOperator) generateDiscovererContainer(spec *deployv1alpha1.Res
 		},
 	}
 
-	// install crds for deployable operator if missing
+	// install crds for discoverer operator if missing
 	_ = utils.CheckAndInstallCRDs(r.dynamicClient, crdRootPath+crdDiscovererSubPath)
 
 	// apply new values from cr if not nil

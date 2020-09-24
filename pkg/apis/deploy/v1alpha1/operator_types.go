@@ -124,8 +124,31 @@ type ResourceDiscovererSpec struct {
 	HubConnectionConfig  *HubConnectionConfig `json:"hubconfig,omitempty"`
 }
 
+var (
+	DefaultPlacementEnablement               = true
+	DefaultPlacementContainerName            = "placement"
+	DefaultPlacementContainerImage           = "quay.io/hybridappio/ham-placementrule"
+	DefaultPlacementContainerImagePullPolicy = corev1.PullAlways
+	DefaultPlacementContainerResources       = corev1.ResourceRequirements{
+		Limits: corev1.ResourceList{
+			"cpu":    resource.MustParse("100m"),
+			"memory": resource.MustParse("512Mi"),
+		},
+		Requests: corev1.ResourceList{
+			"cpu":    resource.MustParse("50m"),
+			"memory": resource.MustParse("64Mi"),
+		},
+	}
+	DefaultPlacementContainerCommand = []string{"ham-placement"}
+)
+
+type PlacementSpec struct {
+	GenericContainerSpec `json:",inline"`
+}
+
 type CoreSpec struct {
 	DeployableOperatorSpec *DeployableOperatorSpec `json:"deployable,omitempty"`
+	PlacementSpec          *PlacementSpec          `json:"placement,omitempty"`
 }
 
 type ToolsSpec struct {
@@ -134,9 +157,6 @@ type ToolsSpec struct {
 }
 
 type LicenseSpec struct {
-	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
-	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors.displayName="Accept terms and conditions"
-	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors.x-descriptors="urn:alm:descriptor:com.tectonic.ui:booleanSwitch"
 	Accept bool `json:"accept"`
 }
 

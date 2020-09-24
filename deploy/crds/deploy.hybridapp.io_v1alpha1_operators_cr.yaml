@@ -9,7 +9,8 @@ spec:
   core:
     deployable:
       enabled: true
-      imagePullPolicy: Always
+    placement:
+      enabled: true
   tools:
     assembler:
-      enabled: false
+      enabled: true

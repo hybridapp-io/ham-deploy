@@ -42,6 +42,7 @@ import (
 const (
 	crdRootPath          = "/usr/local/etc/hybridapp/crds/"
 	crdDeployableSubPath = "core/deployable"
+	crdPlacementSubPath   = "core/placement"
 	crdAssemblerSubPath  = "tools/assembler"
 	crdDiscovererSubPath = "tools/discoverer"
 )
@@ -271,6 +272,22 @@ func (r *ReconcileOperator) configPodByCoreSpec(spec *deployv1alpha1.CoreSpec, r
 		}
 
 		rs.Spec.Template.Spec.Containers = append(rs.Spec.Template.Spec.Containers, *r.generateDeployableContainer(dospec))
+	}
+
+	// add placement container unless spec.CoreSpec.PlacementSpec.Enabled = false
+	exists = spec != nil && spec.PlacementSpec != nil
+	implied = spec == nil || spec.PlacementSpec == nil || spec.PlacementSpec.Enabled == nil
+
+	if implied || *(spec.PlacementSpec.Enabled) {
+		var pspec *deployv1alpha1.PlacementSpec
+
+		if exists {
+			pspec = spec.PlacementSpec
+		} else {
+			pspec = &deployv1alpha1.PlacementSpec{}
+		}
+
+		rs.Spec.Template.Spec.Containers = append(rs.Spec.Template.Spec.Containers, *r.generatePlacementContainer(pspec))
 	}
 
 	return rs
