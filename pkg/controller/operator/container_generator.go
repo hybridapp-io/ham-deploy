@@ -128,7 +128,7 @@ func (r *ReconcileOperator) generatePlacementContainer(spec *deployv1alpha1.Plac
 		},
 	}
 
-	// install crds for discoverer operator if missing
+	// install crds for placement operator if missing
 	_ = utils.CheckAndInstallCRDs(r.dynamicClient, crdRootPath+crdPlacementSubPath)
 
 	ctn = r.configContainerByGenericSpec(&spec.GenericContainerSpec, ctn)
@@ -160,7 +160,7 @@ func (r *ReconcileOperator) generateAssemblerContainer(spec *deployv1alpha1.Appl
 		},
 	}
 
-	// install crds for deployable operator if missing
+	// install crds for assembler operator if missing
 	_ = utils.CheckAndInstallCRDs(r.dynamicClient, crdRootPath+crdAssemblerSubPath)
 
 	ctn = r.configContainerByGenericSpec(&spec.GenericContainerSpec, ctn)
