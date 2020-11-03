@@ -53,7 +53,7 @@ func CheckAndInstallCRD(dcli dynamic.Interface, pathname string) error {
 
 	var crddata []byte
 
-	crddata, err = ioutil.ReadFile(pathname)
+	crddata, err = ioutil.ReadFile(filepath.Clean(pathname))
 	if err != nil {
 		klog.Error("Loading app crd file", err.Error())
 		return err
