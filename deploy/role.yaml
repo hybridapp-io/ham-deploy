@@ -5,15 +5,17 @@ metadata:
   name: ham-deploy
 rules:
 - apiGroups:
-  - '*'
+  - ''
   resources:
-  - '*'
+  - pods
   verbs:
-  - '*'
+  - get
+  - list
+  - watch
 - apiGroups:
-  - tools.hybridapp.io
+  - ''
   resources:
-  - '*'
+  - configmaps
   verbs:
   - create
   - delete
@@ -25,12 +27,33 @@ rules:
 - apiGroups:
   - deploy.hybridapp.io
   resources:
-  - '*'
+  - operators
   verbs:
   - create
   - delete
   - get
   - list
   - patch
+  - update
+  - watch
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - get
+  - create
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
   - update
   - watch

@@ -79,7 +79,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch for changes to secondary resource Pods and requeue the owner Operator
+	// Watch for changes to secondary resource ReplicaSet and requeue the owner Operator
 	err = c.Watch(&source.Kind{Type: &appsv1.ReplicaSet{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &deployv1alpha1.Operator{},
