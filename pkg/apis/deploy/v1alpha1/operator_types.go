@@ -36,7 +36,7 @@ var (
 	ContainerEnvVarKeyPODNAME        = "POD_NAME"
 	ContainerEnvVarKeyOPERATORNAME   = "OPERATOR_NAME"
 
-	DefaultPodServiceAccountName = "ham-deploy"
+	DefaultServiceAccountName = "hybrid-application-model"
 
 	DefaultReplicas = int32(1)
 )
