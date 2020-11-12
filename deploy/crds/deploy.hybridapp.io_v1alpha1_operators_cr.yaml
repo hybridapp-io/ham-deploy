@@ -3,7 +3,7 @@ kind: Operator
 metadata:
   name: hybridapp
 spec:
-  replicas: 2
+  replicas: 1
   license:
     accept: true
   core:
