@@ -182,7 +182,7 @@ type OperatorStatus struct {
 	Phase            Phase                    `json:"phase,omitempty"`
 	Reason           string                   `json:"reason,omitempty"`
 	Message          string                   `json:"message,omitempty"`
-	ReplicaSetStatus *appsv1.ReplicaSetStatus `json:"replicasetstatus,omitempty"`
+	DeploymentStatus *appsv1.DeploymentStatus `json:"replicasetstatus,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

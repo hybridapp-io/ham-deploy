@@ -1,7 +1,7 @@
 apiVersion: deploy.hybridapp.io/v1alpha1
 kind: Operator
 metadata:
-  name: hybridapp
+  name: hybrid-application-model
 spec:
   replicas: 1
   license:
@@ -10,7 +10,7 @@ spec:
     deployable:
       enabled: true
     placement:
-      enabled: true
+      enabled: false
   tools:
     assembler:
       enabled: true

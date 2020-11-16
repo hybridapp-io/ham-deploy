@@ -2,9 +2,37 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
   annotations:
-    alm-examples: '[]'
+    alm-examples: |-
+      [
+        {
+          "apiVersion": "deploy.hybridapp.io/v1alpha1",
+          "kind": "Operator",
+          "metadata": {
+            "name": "hybrid-application-model"
+          },
+          "spec": {
+            "core": {
+              "deployable": {
+                "enabled": true
+              },
+              "placement": {
+                "enabled": false
+              }
+            },
+            "license": {
+              "accept": true
+            },
+            "replicas": 1,
+            "tools": {
+              "assembler": {
+                "enabled": true
+              }
+            }
+          }
+        }
+      ]
     capabilities: Basic Install
-  name: ham-deploy.v0.1.0
+  name: ham-deploy.v0.2.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -13,11 +41,6 @@ spec:
     - description: Operator is the Schema for the operators API
       kind: Operator
       name: operators.deploy.hybridapp.io
-      specDescriptors:
-      - displayName: Accept terms and conditions
-        path: license.accept
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
       version: v1alpha1
   displayName: Ham Deploy
   icon:
@@ -28,27 +51,9 @@ spec:
       clusterPermissions:
       - rules:
         - apiGroups:
-          - '*'
-          resources:
-          - '*'
-          verbs:
-          - '*'
-        - apiGroups:
-          - tools.hybridapp.io
-          resources:
-          - '*'
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
           - deploy.hybridapp.io
           resources:
-          - '*'
+          - operators
           verbs:
           - create
           - delete
@@ -57,7 +62,41 @@ spec:
           - patch
           - update
           - watch
+        - apiGroups:
+          - apiextensions.k8s.io
+          resources:
+          - customresourcedefinitions
+          verbs:
+          - get
+          - create
+          - list
+          - watch
+        - apiGroups:
+          - apps
+          resources:
+          - replicasets
+          - deployments
+          verbs:
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - ""
+          resources:
+          - serviceaccounts
+          verbs:
+          - get
+          - list
+          - watch
         serviceAccountName: ham-deploy
+      - rules:
+        - apiGroups:
+          - '*'
+          resources:
+          - '*'
+          verbs:
+          - '*'
+        serviceAccountName: hybrid-application-model
       deployments:
       - name: ham-deploy
         spec:
@@ -85,11 +124,53 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ham-deploy
-                image: quay.io/hybridappio/ham-deploy
+                image: quay.io/hybridappio/ham-deploy:latest
                 imagePullPolicy: Always
                 name: ham-deploy
                 resources: {}
               serviceAccountName: ham-deploy
+      permissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - configmaps
+          - services
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - apps
+          resources:
+          - replicasets
+          - deployments
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - ""
+          resources:
+          - serviceaccounts
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        serviceAccountName: ham-deploy
     strategy: deployment
   installModes:
   - supported: true
@@ -106,4 +187,5 @@ spec:
   - {}
   maturity: alpha
   provider: {}
-  version: 0.1.0
+  replaces: ham-deploy.v0.1.0
+  version: 0.2.0

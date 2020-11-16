@@ -168,7 +168,7 @@ func (r *ReconcileOperator) generateAssemblerContainer(spec *deployv1alpha1.Appl
 	return ctn
 }
 
-func (r *ReconcileOperator) generateDiscovererContainer(spec *deployv1alpha1.ResourceDiscovererSpec, rs *appsv1.ReplicaSet) *corev1.Container {
+func (r *ReconcileOperator) generateDiscovererContainer(spec *deployv1alpha1.ResourceDiscovererSpec, deployment *appsv1.Deployment) *corev1.Container {
 	envwatchns := corev1.EnvVar{Name: deployv1alpha1.ContainerEnvVarKeyWATCHNAMESPACE, Value: ""}
 	envpn := corev1.EnvVar{
 		Name: deployv1alpha1.ContainerEnvVarKeyPODNAME, ValueFrom: &corev1.EnvVarSource{
@@ -234,7 +234,7 @@ func (r *ReconcileOperator) generateDiscovererContainer(spec *deployv1alpha1.Res
 					},
 				},
 			}
-			rs.Spec.Template.Spec.Volumes = append(rs.Spec.Template.Spec.Volumes, secvol)
+			deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, secvol)
 			// set up mount
 
 			volm := corev1.VolumeMount{
