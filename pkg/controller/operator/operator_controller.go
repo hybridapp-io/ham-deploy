@@ -192,13 +192,13 @@ func (r *ReconcileOperator) mutateDeployment(cr *deployv1alpha1.Operator, deploy
 	}
 
 	deployment.Spec.Template.Spec.ServiceAccountName = deployv1alpha1.DefaultServiceAccountName
-	
+
 	deployment.Spec.Template.Spec.Containers = nil
-	deployment = r.configPodByCoreSpec(cr.Spec.CoreSpec, deployment)
-	deployment = r.configPodByToolsSpec(cr.Spec.ToolsSpec, deployment)
+	r.configPodByCoreSpec(cr.Spec.CoreSpec, deployment)
+	r.configPodByToolsSpec(cr.Spec.ToolsSpec, deployment)
 }
 
-func (r *ReconcileOperator) configPodByCoreSpec(spec *deployv1alpha1.CoreSpec, deployment *appsv1.Deployment) *appsv1.Deployment {
+func (r *ReconcileOperator) configPodByCoreSpec(spec *deployv1alpha1.CoreSpec, deployment *appsv1.Deployment) {
 	var exists, implied bool
 
 	// add deployable container unless spec.CoreSpec.DeployableOperatorSpec.Enabled = false
@@ -213,7 +213,7 @@ func (r *ReconcileOperator) configPodByCoreSpec(spec *deployv1alpha1.CoreSpec, d
 		} else {
 			dospec = &deployv1alpha1.DeployableOperatorSpec{}
 		}
-			deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, *r.generateDeployableContainer(dospec))
+		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, *r.generateDeployableContainer(dospec))
 	}
 
 	// add placement container unless spec.CoreSpec.PlacementSpec.Enabled = false
@@ -230,11 +230,9 @@ func (r *ReconcileOperator) configPodByCoreSpec(spec *deployv1alpha1.CoreSpec, d
 		}
 		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, *r.generatePlacementContainer(pspec))
 	}
-	
-	return deployment
 }
 
-func (r *ReconcileOperator) configPodByToolsSpec(spec *deployv1alpha1.ToolsSpec, deployment *appsv1.Deployment) *appsv1.Deployment {
+func (r *ReconcileOperator) configPodByToolsSpec(spec *deployv1alpha1.ToolsSpec, deployment *appsv1.Deployment) {
 	var exists, implied bool
 
 	// add assembler container unless spec.ToolsSpec.ApplicationAssemblerSpec.Enabled = false
@@ -260,6 +258,4 @@ func (r *ReconcileOperator) configPodByToolsSpec(spec *deployv1alpha1.ToolsSpec,
 
 		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, *r.generateDiscovererContainer(rdspec, deployment))
 	}
-
-	return deployment
 }
