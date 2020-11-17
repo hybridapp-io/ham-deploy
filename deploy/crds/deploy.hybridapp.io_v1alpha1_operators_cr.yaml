@@ -10,7 +10,7 @@ spec:
     deployable:
       enabled: true
     placement:
-      enabled: false
+      enabled: true
   tools:
     assembler:
       enabled: true
