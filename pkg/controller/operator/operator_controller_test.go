@@ -84,20 +84,20 @@ func TestReconcile(t *testing.T) {
 
 	g.Expect(c.Create(context.TODO(), deploy)).To(Succeed())
 
-	rs := &appsv1.ReplicaSet{}
-	rsKey := types.NamespacedName{
+	deployment := &appsv1.Deployment{}
+	deploymentKey := types.NamespacedName{
 		Name:      request.Name,
 		Namespace: request.Namespace,
 	}
 
 	time.Sleep(interval)
-	g.Expect(c.Get(context.TODO(), rsKey, rs)).To(Succeed())
-	g.Expect(len(rs.Spec.Template.Spec.Containers) == defaultContainerNumber).To(BeTrue())
+	g.Expect(c.Get(context.TODO(), deploymentKey, deployment)).To(Succeed())
+	g.Expect(len(deployment.Spec.Template.Spec.Containers) == defaultContainerNumber).To(BeTrue())
 
-	// delete replicaset should trigger recreation
-	g.Expect(c.Delete(context.TODO(), rs)).To(Succeed())
+	// delete deployment should trigger recreation
+	g.Expect(c.Delete(context.TODO(), deployment)).To(Succeed())
 	time.Sleep(interval)
-	g.Expect(c.Get(context.TODO(), rsKey, rs)).To(Succeed())
+	g.Expect(c.Get(context.TODO(), deploymentKey, deployment)).To(Succeed())
 
 	// delete the deploy first
 	g.Expect(c.Get(context.TODO(), request, deploy)).To(Succeed())
@@ -107,12 +107,12 @@ func TestReconcile(t *testing.T) {
 	err = c.Get(context.TODO(), request, deploy)
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())
 
-	// test api server does not respect delete by ownerreference, so replicaset won't be automatically deleted
-	// can only test delete replicaset after deploy wont trigger recreation
-	g.Expect(c.Delete(context.TODO(), rs)).To(Succeed())
+	// test api server does not respect delete by ownerreference, so deployment won't be automatically deleted
+	// can only test delete deployment after deploy wont trigger recreation
+	g.Expect(c.Delete(context.TODO(), deployment)).To(Succeed())
 	time.Sleep(interval)
 
-	err = c.Get(context.TODO(), rsKey, rs)
+	err = c.Get(context.TODO(), deploymentKey, deployment)
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())
 }
 
@@ -177,15 +177,15 @@ func TestDiscoverer(t *testing.T) {
 
 	g.Expect(c.Create(context.TODO(), deploy)).To(Succeed())
 
-	rs := &appsv1.ReplicaSet{}
-	rsKey := types.NamespacedName{
+	deployment := &appsv1.Deployment{}
+	deploymentKey := types.NamespacedName{
 		Name:      request.Name,
 		Namespace: request.Namespace,
 	}
 
 	time.Sleep(interval)
-	g.Expect(c.Get(context.TODO(), rsKey, rs)).To(Succeed())
-	g.Expect(len(rs.Spec.Template.Spec.Containers) == single).To(BeTrue())
+	g.Expect(c.Get(context.TODO(), deploymentKey, deployment)).To(Succeed())
+	g.Expect(len(deployment.Spec.Template.Spec.Containers) == single).To(BeTrue())
 
 	// delete the deploy first
 	g.Expect(c.Get(context.TODO(), request, deploy)).To(Succeed())
@@ -195,10 +195,10 @@ func TestDiscoverer(t *testing.T) {
 	err = c.Get(context.TODO(), request, deploy)
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())
 
-	g.Expect(c.Delete(context.TODO(), rs)).To(Succeed())
+	g.Expect(c.Delete(context.TODO(), deployment)).To(Succeed())
 	time.Sleep(interval)
 
-	err = c.Get(context.TODO(), rsKey, rs)
+	err = c.Get(context.TODO(), deploymentKey, deployment)
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())
 }
 
@@ -231,13 +231,13 @@ func TestRefuseLicense(t *testing.T) {
 
 	g.Expect(c.Create(context.TODO(), deploy)).To(Succeed())
 
-	rs := &appsv1.ReplicaSet{}
-	rsKey := types.NamespacedName{
+	deployment := &appsv1.Deployment{}
+	deploymentKey := types.NamespacedName{
 		Name:      request.Name,
 		Namespace: request.Namespace,
 	}
 
-	err = c.Get(context.TODO(), rsKey, rs)
+	err = c.Get(context.TODO(), deploymentKey, deployment)
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())
 
 	g.Expect(c.Get(context.TODO(), request, deploy)).To(Succeed())
@@ -301,15 +301,15 @@ func TestPodChange(t *testing.T) {
 
 	g.Expect(c.Create(context.TODO(), deploy)).To(Succeed())
 
-	rs := &appsv1.ReplicaSet{}
-	rsKey := types.NamespacedName{
+	deployment := &appsv1.Deployment{}
+	deploymentKey := types.NamespacedName{
 		Name:      request.Name,
 		Namespace: request.Namespace,
 	}
 
 	time.Sleep(interval)
-	g.Expect(c.Get(context.TODO(), rsKey, rs)).To(Succeed())
-	g.Expect(len(rs.Spec.Template.Spec.Containers) == defaultContainerNumber).To(BeTrue())
+	g.Expect(c.Get(context.TODO(), deploymentKey, deployment)).To(Succeed())
+	g.Expect(len(deployment.Spec.Template.Spec.Containers) == defaultContainerNumber).To(BeTrue())
 
 	//disable a container
 	g.Expect(c.Get(context.TODO(), request, deploy)).To(Succeed())
@@ -318,8 +318,8 @@ func TestPodChange(t *testing.T) {
 	g.Expect(c.Update(context.TODO(), deploy)).To(Succeed())
 
 	time.Sleep(interval)
-	g.Expect(c.Get(context.TODO(), rsKey, rs)).To(Succeed())
-	g.Expect(len(rs.Spec.Template.Spec.Containers) == single).To(BeTrue())
+	g.Expect(c.Get(context.TODO(), deploymentKey, deployment)).To(Succeed())
+	g.Expect(len(deployment.Spec.Template.Spec.Containers) == single).To(BeTrue())
 
 	// delete the deploy first
 	g.Expect(c.Get(context.TODO(), request, deploy)).To(Succeed())
@@ -329,10 +329,10 @@ func TestPodChange(t *testing.T) {
 	err = c.Get(context.TODO(), request, deploy)
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())
 
-	g.Expect(c.Delete(context.TODO(), rs)).To(Succeed())
+	g.Expect(c.Delete(context.TODO(), deployment)).To(Succeed())
 	time.Sleep(interval)
 
-	err = c.Get(context.TODO(), rsKey, rs)
+	err = c.Get(context.TODO(), deploymentKey, deployment)
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())
 }
 
@@ -389,15 +389,15 @@ func TestReplicaNumberChange(t *testing.T) {
 
 	g.Expect(c.Create(context.TODO(), deploy)).To(Succeed())
 
-	rs := &appsv1.ReplicaSet{}
-	rsKey := types.NamespacedName{
+	deployment := &appsv1.Deployment{}
+	deploymentKey := types.NamespacedName{
 		Name:      request.Name,
 		Namespace: request.Namespace,
 	}
 
 	time.Sleep(interval)
-	g.Expect(c.Get(context.TODO(), rsKey, rs)).To(Succeed())
-	g.Expect(*rs.Spec.Replicas == deployv1alpha1.DefaultReplicas).To(BeTrue())
+	g.Expect(c.Get(context.TODO(), deploymentKey, deployment)).To(Succeed())
+	g.Expect(*deployment.Spec.Replicas == deployv1alpha1.DefaultReplicas).To(BeTrue())
 
 	//increase replica count
 	replicas := int32(3)
@@ -406,8 +406,8 @@ func TestReplicaNumberChange(t *testing.T) {
 	g.Expect(c.Update(context.TODO(), deploy)).To(Succeed())
 
 	time.Sleep(interval)
-	g.Expect(c.Get(context.TODO(), rsKey, rs)).To(Succeed())
-	g.Expect(*rs.Spec.Replicas == replicas).To(BeTrue())
+	g.Expect(c.Get(context.TODO(), deploymentKey, deployment)).To(Succeed())
+	g.Expect(*deployment.Spec.Replicas == replicas).To(BeTrue())
 
 	// delete the deploy first
 	g.Expect(c.Get(context.TODO(), request, deploy)).To(Succeed())
@@ -417,9 +417,9 @@ func TestReplicaNumberChange(t *testing.T) {
 	err = c.Get(context.TODO(), request, deploy)
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())
 
-	g.Expect(c.Delete(context.TODO(), rs)).To(Succeed())
+	g.Expect(c.Delete(context.TODO(), deployment)).To(Succeed())
 	time.Sleep(interval)
 
-	err = c.Get(context.TODO(), rsKey, rs)
+	err = c.Get(context.TODO(), deploymentKey, deployment)
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())
 }

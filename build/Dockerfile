@@ -1,7 +1,7 @@
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.2
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.3
 
 # Update image
-RUN microdnf update -y && rm -rf /var/cache/yum
+RUN microdnf update -y && microdnf clean all
 
 ENV OPERATOR=/usr/local/bin/ham-deploy \
     USER_UID=1001 \

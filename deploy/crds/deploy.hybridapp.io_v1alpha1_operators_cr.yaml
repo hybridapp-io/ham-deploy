@@ -1,9 +1,9 @@
 apiVersion: deploy.hybridapp.io/v1alpha1
 kind: Operator
 metadata:
-  name: hybridapp
+  name: hybrid-application-model
 spec:
-  replicas: 2
+  replicas: 1
   license:
     accept: true
   core:
