@@ -18,6 +18,7 @@ import (
 	"context"
 
 	deployv1alpha1 "github.com/hybridapp-io/ham-deploy/pkg/apis/deploy/v1alpha1"
+	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -192,6 +193,16 @@ func (r *ReconcileOperator) mutateDeployment(cr *deployv1alpha1.Operator, deploy
 	}
 
 	deployment.Spec.Template.Spec.ServiceAccountName = deployv1alpha1.DefaultServiceAccountName
+
+	// inherit operator imagePullSecret, if available
+	opns, err := k8sutil.GetOperatorNamespace()
+	if err == nil {
+		oppod, err := k8sutil.GetPod(context.TODO(), r.client, opns)
+
+		if err == nil {
+			deployment.Spec.Template.Spec.ImagePullSecrets = oppod.Spec.ImagePullSecrets
+		}
+	}
 
 	deployment.Spec.Template.Spec.Containers = nil
 	r.configPodByCoreSpec(cr.Spec.CoreSpec, deployment)
