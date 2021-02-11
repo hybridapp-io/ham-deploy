@@ -18,8 +18,10 @@ import (
 	"context"
 
 	deployv1alpha1 "github.com/hybridapp-io/ham-deploy/pkg/apis/deploy/v1alpha1"
+	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 
 	appsv1 "k8s.io/api/apps/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -193,6 +195,21 @@ func (r *ReconcileOperator) mutateDeployment(cr *deployv1alpha1.Operator, deploy
 
 	deployment.Spec.Template.Spec.ServiceAccountName = deployv1alpha1.DefaultServiceAccountName
 
+	// inherit operator imagePullSecret, if available
+	opns, err := k8sutil.GetOperatorNamespace()
+	if err == nil {
+		oppod, err := k8sutil.GetPod(context.TODO(), r.client, opns)
+
+		if err == nil {
+			ps := oppod.Spec.ImagePullSecrets
+			for _, s := range ps {
+				if !contains(deployment.Spec.Template.Spec.ImagePullSecrets, s) {
+					deployment.Spec.Template.Spec.ImagePullSecrets = append(deployment.Spec.Template.Spec.ImagePullSecrets, s)
+				}
+			}
+		}
+	}
+
 	deployment.Spec.Template.Spec.Containers = nil
 	r.configPodByCoreSpec(cr.Spec.CoreSpec, deployment)
 	r.configPodByToolsSpec(cr.Spec.ToolsSpec, deployment)
@@ -258,4 +275,13 @@ func (r *ReconcileOperator) configPodByToolsSpec(spec *deployv1alpha1.ToolsSpec,
 
 		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, *r.generateDiscovererContainer(rdspec, deployment))
 	}
+}
+
+func contains(s []v1.LocalObjectReference, e v1.LocalObjectReference) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
