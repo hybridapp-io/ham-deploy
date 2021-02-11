@@ -21,6 +21,7 @@ import (
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 
 	appsv1 "k8s.io/api/apps/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -200,7 +201,12 @@ func (r *ReconcileOperator) mutateDeployment(cr *deployv1alpha1.Operator, deploy
 		oppod, err := k8sutil.GetPod(context.TODO(), r.client, opns)
 
 		if err == nil {
-			deployment.Spec.Template.Spec.ImagePullSecrets = oppod.Spec.ImagePullSecrets
+			ps := oppod.Spec.ImagePullSecrets
+			for _, s := range ps {
+				if !contains(deployment.Spec.Template.Spec.ImagePullSecrets, s) {
+					deployment.Spec.Template.Spec.ImagePullSecrets = append(deployment.Spec.Template.Spec.ImagePullSecrets, s)
+				}
+			}
 		}
 	}
 
@@ -269,4 +275,13 @@ func (r *ReconcileOperator) configPodByToolsSpec(spec *deployv1alpha1.ToolsSpec,
 
 		deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, *r.generateDiscovererContainer(rdspec, deployment))
 	}
+}
+
+func contains(s []v1.LocalObjectReference, e v1.LocalObjectReference) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
