@@ -297,6 +297,7 @@ func (r *ReconcileOperator) removeLegacyReplicaSet(cr *deployv1alpha1.Operator) 
 		if err != nil {
 			klog.Error("Failed to delete legacy replica, error:", err)
 		}
+	}
 }
 
 func contains(s []v1.LocalObjectReference, e v1.LocalObjectReference) bool {
