@@ -140,7 +140,6 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 		return reconcile.Result{}, nil
 	}
 
-
 	r.removeLegacyReplicaSet(instance)
 
 	// Reconcile Deployment
@@ -288,7 +287,7 @@ func (r *ReconcileOperator) removeLegacyReplicaSet(cr *deployv1alpha1.Operator) 
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return //No legacy instance
-		} 
+		}
 	}
 	err = r.client.Delete(context.TODO(), found)
 	if err != nil {
