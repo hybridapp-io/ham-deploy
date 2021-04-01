@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 
 	"k8s.io/client-go/dynamic"
 	"k8s.io/klog"
@@ -138,6 +139,9 @@ func (r *ReconcileOperator) Reconcile(request reconcile.Request) (reconcile.Resu
 
 		return reconcile.Result{}, nil
 	}
+
+
+	r.removeLegacyReplicaSet(instance)
 
 	// Reconcile Deployment
 	deployment := &appsv1.Deployment{}
@@ -279,13 +283,6 @@ func (r *ReconcileOperator) configPodByToolsSpec(spec *deployv1alpha1.ToolsSpec,
 
 //Clean up old replicaset
 func (r *ReconcileOperator) removeLegacyReplicaSet(cr *deployv1alpha1.Operator) {
-	rs := &appsv1.ReplicaSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name,
-			Namespace: cr.Namespace,
-		},
-	}
-
 	found := &appsv1.ReplicaSet{}
 	err := r.client.Get(context.TODO(), types.NamespacedName{Name: cr.Name, Namespace: cr.Namespace}, found)
 	if err != nil {
