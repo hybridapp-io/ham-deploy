@@ -295,7 +295,7 @@ func (r *ReconcileOperator) removeLegacyReplicaSet(cr *deployv1alpha1.Operator) 
 
 		err = r.client.Delete(context.TODO(), found)
 		if err != nil {
-			klog.Error("Failed to delete legacy replica, error:", err)
+			klog.Error("Failed to delete legacy replicaset, error:", err)
 		}
 	}
 }
