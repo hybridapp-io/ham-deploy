@@ -52,33 +52,38 @@ spec:
       clusterPermissions:
       - rules:
         - apiGroups:
-          - deploy.hybridapp.io
+          - mcm.ibm.com
           resources:
-          - operators
-          - operators/status
+          - clusterstatuses/log
           verbs:
-          - create
-          - delete
           - get
-          - list
-          - patch
-          - update
-          - watch
         - apiGroups:
           - deploy.hybridapp.io
           resources:
-          - operators/status
+          - '*'
           verbs:
-          - update
+          - '*'
+        - apiGroups:
+          - core.hybridapp.io
+          resources:
+          - '*'
+          verbs:
+          - '*'
+        - apiGroups:
+          - tools.hybridapp.io
+          resources:
+          - '*'
+          verbs:
+          - '*'
         - apiGroups:
           - apiextensions.k8s.io
           resources:
           - customresourcedefinitions
           verbs:
           - get
-          - create
           - list
           - watch
+          - create
         - apiGroups:
           - apps
           resources:
@@ -91,11 +96,129 @@ spec:
         - apiGroups:
           - ""
           resources:
+          - pods
           - serviceaccounts
+          - namespaces
           verbs:
           - get
           - list
           - watch
+        - apiGroups:
+          - rbac.authorization.k8s.io
+          resources:
+          - clusterroles
+          - roles
+          - rolebindings
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - update
+        - apiGroups:
+          - app.ibm.com
+          resources:
+          - '*'
+          verbs:
+          - '*'
+        - apiGroups:
+          - apps.open-cluster-management.io
+          resources:
+          - '*'
+          verbs:
+          - '*'
+        - apiGroups:
+          - cluster.open-cluster-management.io
+          resources:
+          - managedclusters
+          - managedclusters/finalizers
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - update
+          - delete
+        - apiGroups:
+          - proxy.open-cluster-management.io
+          resources:
+          - '*'
+          verbs:
+          - '*'
+        - apiGroups:
+          - view.open-cluster-management.io
+          resources:
+          - managedclusterviews
+          verbs:
+          - '*'
+        - apiGroups:
+          - clusterregistry.k8s.io
+          resources:
+          - clusters
+          - clusters/finalizers
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - update
+          - delete
+        - apiGroups:
+          - app.k8s.io
+          resources:
+          - applications
+          verbs:
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - apiextensions.k8s.io
+          resources:
+          - applicationassemblers.core.hybridapp.io
+          verbs:
+          - get
+        - apiGroups:
+          - apiextensions.k8s.io
+          resources:
+          - channels.apps.open-cluster-management.io
+          verbs:
+          - get
+        - apiGroups:
+          - apiextensions.k8s.io
+          resources:
+          - deployables.core.hybridapp.io
+          verbs:
+          - get
+        - apiGroups:
+          - apiextensions.k8s.io
+          resources:
+          - deployers.core.hybridapp.io
+          verbs:
+          - get
+        - apiGroups:
+          - apiextensions.k8s.io
+          resources:
+          - deployersets.core.hybridapp.io
+          verbs:
+          - get
+        - apiGroups:
+          - apiextensions.k8s.io
+          resources:
+          - placementrules.apps.open-cluster-management.io
+          verbs:
+          - get
+        - apiGroups:
+          - apiextensions.k8s.io
+          resources:
+          - subscriptions.apps.open-cluster-management.io
+          verbs:
+          - get
+        - apiGroups:
+          - apiextensions.k8s.io
+          resources:
+          - deployables.apps.open-cluster-management.io
+          verbs:
+          - get
         serviceAccountName: ham-deploy
       - rules:
         - apiGroups:
@@ -158,6 +281,7 @@ spec:
           resources:
           - replicasets
           - deployments
+          - deployments/finalizers
           verbs:
           - create
           - delete
@@ -189,4 +313,5 @@ spec:
   maturity: alpha
   provider:
     name: IBM
+  replaces: ham-deploy.v0.1.0
   version: 0.2.0
