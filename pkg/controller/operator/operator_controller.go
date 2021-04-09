@@ -201,7 +201,6 @@ func (r *ReconcileOperator) mutateDeployment(cr *deployv1alpha1.Operator, deploy
 	deployment.Spec.Template.Spec.HostIPC = false
 	deployment.Spec.Template.Spec.HostNetwork = false
 	deployment.Spec.Template.Spec.HostPID = false
-	deployment.Spec.Template.Spec.SecurityContext.RunAsNonRoot = &runAsNonRoot
 
 	// inherit operator imagePullSecret, if available
 	opns, err := k8sutil.GetOperatorNamespace()
