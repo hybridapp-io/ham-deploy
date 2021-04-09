@@ -51,14 +51,16 @@ func (r *ReconcileOperator) configContainerByGenericSpec(spec *deployv1alpha1.Ge
 		ctn.Args = spec.Args
 	}
 
+	privileged := false
 	runAsNonRoot := true
+	readOnlyRootFileSystem := true
+	allowprivilegeEscalation := false
 	ctn.SecurityContext = &corev1.SecurityContext{
-		Capabilities: &corev1.Capabilities{
-			Drop: []corev1.Capability{
-				"ALL",
-			},
-		},
-		RunAsNonRoot: &runAsNonRoot,
+		Capabilities:             &corev1.Capabilities{Drop: []corev1.Capability{"ALL"}},
+		Privileged:               &privileged,
+		RunAsNonRoot:             &runAsNonRoot,
+		ReadOnlyRootFilesystem:   &readOnlyRootFileSystem,
+		AllowPrivilegeEscalation: &allowprivilegeEscalation,
 	}
 
 	return ctn
