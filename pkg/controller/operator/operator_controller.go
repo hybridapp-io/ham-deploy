@@ -194,6 +194,7 @@ func (r *ReconcileOperator) mutateDeployment(cr *deployv1alpha1.Operator, deploy
 
 	if cr.Annotations != nil {
 		deployment.Spec.Template.Annotations = cr.Annotations
+		deployment.Spec.Template.Annotations["seccomp.security.alpha.kubernetes.io/pod"] = "runtime/default"
 	}
 
 	deployment.Spec.Template.Spec.ServiceAccountName = deployv1alpha1.DefaultServiceAccountName
