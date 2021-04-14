@@ -9,6 +9,8 @@ spec:
       name: ham-deploy
   template:
     metadata:
+      annotations:
+        seccomp.security.alpha.kubernetes.io/pod: runtime/default
       labels:
         name: ham-deploy
     spec:
